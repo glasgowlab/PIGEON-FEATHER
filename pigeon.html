@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIGEON &mdash; pigeon_feather 0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=049aceee"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FEATHER" href="feather.html" />
+    <link rel="prev" title="HDX/MS" href="hdx.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pigeon_feather
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="documentation.html">Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hdx.html">HDX/MS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PIGEON</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cmd-options">CMD Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="feather.html">FEATHER</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pigeon_feather</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="documentation.html">Documentation</a></li>
+      <li class="breadcrumb-item active">PIGEON</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pigeon.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pigeon">
+<h1>PIGEON<a class="headerlink" href="#pigeon" title="Link to this heading"></a></h1>
+<p><strong>pigeon</strong> is a stand-only program that takes in a list of peptide pool csv
+and outputs a cleaned csv of pooled data. It also outputs a rangeslist table for merge in FEATHER.</p>
+<section id="cmd-options">
+<h2>CMD Options<a class="headerlink" href="#cmd-options" title="Link to this heading"></a></h2>
+<p>Type <code class="docutils literal notranslate"><span class="pre">pigeon</span> <span class="pre">--help</span></code> to see the following options:</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>, <code class="docutils literal notranslate"><span class="pre">--table</span></code>: Path(s) to input csv. Required</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--o</span></code>, <code class="docutils literal notranslate"><span class="pre">--out</span></code>: path to output csv, if any.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--p</span></code>, <code class="docutils literal notranslate"><span class="pre">--plots</span></code>: directory for output plots. Default: ‘./csvplots’</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--ov</span></code>, <code class="docutils literal notranslate"><span class="pre">--overlap</span></code>: flag specifying how to treat overlapping duplicates. Options: ‘keep’, ‘drop’, ‘select’ (or any other). Default: ‘select’</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--r</span></code>, <code class="docutils literal notranslate"><span class="pre">--rangeslist</span></code>: path to output rangeslist, if any.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--RTC</span></code>: RT cutoff for duplicate peptides. Default: 0.5</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--MZC</span></code>: m/z cutoff for duplicate peptides. Default: 0.1</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--scoreC</span></code>: Score threshold for provisional cut for trendline fit. Default: 150</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--ppmC</span></code>: m/z deviation cutoff (in ppm) for cut about trendline. Default: 7</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--maxfev</span></code>: maxfev for curve_fit for trendline.</div>
+</div>
+<p>Default inputs</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code> (list of peptide pool csvs)</div>
+</div>
+<p>Default outputs</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--o</span></code> (batched and cleaned peptide pool csv)</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--r</span></code> (rangeslist table for merge in post-PIGEON)</div>
+</div>
+<p>In the plot directory, the following files are generated:</p>
+<p>score histograms:</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line"><cite>hist-scores-all.png</cite>: Histogram of score for all pooled data.</div>
+<div class="line"><cite>hist-scores-cut.png</cite>: Histogram of score for high scoring data used for curve fit.</div>
+<div class="line"><cite>hist-scores-ppm.png</cite>: Histogram of score after cut at ppmC from trendline.</div>
+<div class="line"><cite>hist-scores-topscores.png</cite>: Histogram of score after dropping all but best match for each charge state.</div>
+<div class="line"><cite>hist-scores-flagged.png</cite>: Histogram of score for non-overlapping duplicates.</div>
+<div class="line"><cite>hist-scores-yellow.png</cite>: Histogram of score for overlapping duplicates.</div>
+<div class="line"><cite>hist-scores-clean.png</cite>: Histogram of score for final cleaned data.</div>
+</div>
+</div></blockquote>
+<p>scatterplots:</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line"><cite>scatter-30ppm.png</cite>: All data before cuts, ppm m/z deviation vs m/z measured, colorbar Score.</div>
+<div class="line"><cite>scatter-hscoring.png</cite>: High scoring data used for curve fit.</div>
+<div class="line"><cite>scatter-7ppm.png</cite>: All data after cut at ppmC from trendline.</div>
+<div class="line"><cite>scatter-topscore.png</cite>: Data after dropping all but best match for each charge state.</div>
+<div class="line"><cite>scatter-flagged.png</cite>: Data dropped for being duplicates, non-overlapping.</div>
+<div class="line"><cite>scatter-yellow.png</cite>: Data dropped for being duplicates, overlapping.</div>
+<div class="line"><cite>scatter-clean.png</cite>: Final cleaned data.</div>
+</div>
+</div></blockquote>
+<p>ppm histogram:</p>
+<blockquote>
+<div><p><cite>hist-ppms.png</cite>: Histogram of abs(distance from trendline) for all data, showing location of cut.</p>
+</div></blockquote>
+</section>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h2>
+<p>Below are examples of how to use the <code class="docutils literal notranslate"><span class="pre">pigeon</span></code> program with various arguments:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pigeon<span class="w"> </span>--t<span class="w"> </span>pool-1.csv<span class="w"> </span>pool-2.csv<span class="w"> </span>pool-3.csv<span class="w"> </span>--p<span class="w"> </span>csvplots<span class="w"> </span>--ov<span class="w"> </span>keep<span class="w"> </span>--o<span class="w"> </span>keep-pooled.csv<span class="w"> </span>--r<span class="w"> </span>rangeslist.csv<span class="w"> </span>--MZC<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span>--RTC<span class="w"> </span><span class="m">0</span>.25<span class="w"> </span>--scoreC<span class="w"> </span><span class="m">200</span><span class="w"> </span>--ppmC<span class="w"> </span><span class="m">5</span><span class="w"> </span>--maxfev<span class="w"> </span><span class="m">2000</span>
+</pre></div>
+</div>
+<p>Alternative usage example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pigeon<span class="w"> </span>--t<span class="w"> </span>pool-1.csv<span class="w"> </span>--o<span class="w"> </span><span class="k">select</span>-pooled.csv<span class="w"> </span>--r<span class="w"> </span>rangeslist.csv
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hdx.html" class="btn btn-neutral float-left" title="HDX/MS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="feather.html" class="btn btn-neutral float-right" title="FEATHER" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, glasgowlab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

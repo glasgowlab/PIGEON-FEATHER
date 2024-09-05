@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01_load_data &mdash; pigeon_feather 0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=049aceee"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="02_peptide_level_analysis" href="02_peptide_level_analysis.html" />
+    <link rel="prev" title="00_Showcase ecDHFR: a FEATHER walkthrough" href="00_ecdhfr_showcase.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pigeon_feather
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00_ecdhfr_showcase.html">00_Showcase ecDHFR: a FEATHER walkthrough</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">01_load_data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Read-the-centroid-data">Read the centroid data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Load-the-raw-spectrum">Load the raw spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="02_peptide_level_analysis.html">02_peptide_level_analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03_calculate_PFs.html">03_calculate_PFs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_check_the_fitting.html">04_check_the_fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05_plot_the_results.html">05_plot_the_results</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pigeon_feather</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorial.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">01_load_data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/01_load_data.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="01_load_data">
+<h1>01_load_data<a class="headerlink" href="#01_load_data" title="Link to this heading"></a></h1>
+<p>In principle, FEATHER can accept the output from any HX/MS software.</p>
+<p>There are two types of input files: 1. Peptide pools with centroid deuteration values 2. Raw mass spectra (deconvoluted)</p>
+<section id="Read-the-centroid-data">
+<h2>Read the centroid data<a class="headerlink" href="#Read-the-centroid-data" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Table:</strong> The peptide pool.</p></li>
+<li><p><strong>Range List:</strong> A file that defines the peptides to include or exclude.</p></li>
+<li><p><strong>n_fastamides:</strong> In an HDX experiment, the first two residues of a peptide at the N-terminus do not contribute to deuterium uptake due to rapid back exchange.</p></li>
+<li><p><strong>Saturation:</strong> The percentage of deuterium in the D2O buffer.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pigeon_feather.data</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pigeon_feather.plot</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pigeon_feather.hxio</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pigeon_feather.spectra</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;./data/ecDHFR_tutorial.csv&#39;</span><span class="p">]</span>
+
+<span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;./data/rangeslist.csv&#39;</span><span class="p">]</span>
+
+
+<span class="n">raw_spectra_paths</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;./data/SpecExport/&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">protein_sequence</span> <span class="o">=</span> <span class="s2">&quot;MTGHHHHHHENLYFQSISLIAALAVDRVIGMENAMPWNLPADLAWFKRNTLDKPVIMGRHTWESIGRPLPGRKNIILSSQPGTDDRVTWVKSVDEAIAACGDVPEIMVIGGGRVYEQFLPKAQKLYLTHIDAEVEGDTHFPDYEPDDWESVFSEFHDADAQNSHSYCFEILERR&quot;</span>
+
+<span class="c1"># load the data</span>
+<span class="n">hdxms_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)):</span>
+    <span class="c1"># for i in [4]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># read the data and clean it</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">read_hdx_tables</span><span class="p">([</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="p">[</span><span class="n">ranges</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states_subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;APO&#39;</span><span class="p">,</span><span class="s1">&#39;TRI&#39;</span><span class="p">])</span>
+
+    <span class="c1"># convert the cleaned data to hdxms data object</span>
+    <span class="n">hdxms_data</span> <span class="o">=</span> <span class="n">load_dataframe_to_hdxmsdata</span><span class="p">(</span>
+        <span class="n">cleaned</span><span class="p">,</span>
+        <span class="n">n_fastamides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">protein_sequence</span><span class="o">=</span><span class="n">protein_sequence</span><span class="p">,</span>
+        <span class="n">fulld_approx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">saturation</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">hdxms_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdxms_data</span><span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+./data/ecDHFR_tutorial.csv
+rangeslist included !
+</pre></div></div>
+</div>
+<p>check the basic statics_info of the hdxms_data_list</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pigeon_feather.hxio</span> <span class="kn">import</span> <span class="n">get_all_statics_info</span>
+
+<span class="n">get_all_statics_info</span><span class="p">(</span><span class="n">hdxms_data_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+============================================================
+                    HDX-MS Data Statistics
+============================================================
+States names: [&#39;APO&#39;, &#39;TRI&#39;]
+Time course (s): [46.0, 373.5, 572.5, 2011.0, 7772.0, 30811.5, 43292.0]
+Number of time points: 7
+Protein sequence length: 174
+Average coverage: 0.97
+Number of unique peptides: 261
+Average peptide length: 9.8
+Redundancy (based on average coverage): 14.7
+Average peptide length to redundancy ratio: 0.7
+Backexchange average, IQR: 0.27, 0.26
+============================================================
+</pre></div></div>
+</div>
+</section>
+<section id="Load-the-raw-spectrum">
+<h2>Load the raw spectrum<a class="headerlink" href="#Load-the-raw-spectrum" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># spectrum could be easily loaded to the hdxms_data object</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)):</span>
+    <span class="n">load_raw_ms_to_hdxms_data</span><span class="p">(</span>
+        <span class="n">hdxms_data</span><span class="p">,</span>
+        <span class="n">raw_spectra_paths</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Removed 0 peptides from state APO due to missing raw MS data.
+Removed 70 peptides from state APO due to high back exchange.
+Removed 2 peptides from state TRI due to missing raw MS data.
+Removed 70 peptides from state TRI due to high back exchange.
+Done loading raw MS data.
+</pre></div></div>
+</div>
+<p><strong>Note:</strong> One common error is that the correct spectra file cannot be found. Please ensure that the <code class="docutils literal notranslate"><span class="pre">protein_state.state_name</span></code> corresponds to the files in the spectrum folder, with the correct time points and charge states.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save the raw data as a pickle file</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">today</span> <span class="o">=</span> <span class="s2">&quot;20240722&quot;</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./data/hdxms_data_raw_</span><span class="si">{</span><span class="n">today</span><span class="si">}</span><span class="s2">.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">hdxms_data_list</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># with open(f&quot;./data/hdxms_data_raw_{today}.pkl&quot;, &quot;rb&quot;) as f:</span>
+<span class="c1">#     hdxms_data_list = pickle.load(f)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="00_ecdhfr_showcase.html" class="btn btn-neutral float-left" title="00_Showcase ecDHFR: a FEATHER walkthrough" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="02_peptide_level_analysis.html" class="btn btn-neutral float-right" title="02_peptide_level_analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, glasgowlab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
