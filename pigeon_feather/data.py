@@ -819,20 +819,35 @@ class PeptideCompare:
         'deuterium difference between two peptides at a specific timepoint'
         deut1_array = np.array(
             [
-                pep1.get_deut_percent(timepoint)
+                tp.d_percent
                 for pep1 in self.peptide1_list
-                if pep1.get_deut_percent(timepoint) is not None
+                for tp in pep1.timepoints
+                if tp.deut_time == timepoint
             ]
         )
         deut2_array = np.array(
             [
-                pep2.get_deut_percent(timepoint)
+                tp.d_percent
                 for pep2 in self.peptide2_list
-                if pep2.get_deut_percent(timepoint) is not None
+                for tp in pep2.timepoints
+                if tp.deut_time == timepoint
             ]
         )
 
         result = deut1_array.mean() - deut2_array.mean()
+
+        #significance test: 
+        deut1_std = np.std(deut1_array)
+        deut2_std = np.std(deut2_array)
+
+        combined_std = np.sqrt(deut1_std**2 + deut2_std**2)
+
+        if result < combined_std: #if the result is less than combined std, it is not significant
+            result = 0
+
+        if deut2_array.size == 1 and deut1_array.size == 1:
+            result = 0
+
         return result
 
 
