@@ -772,7 +772,7 @@ def remove_tps_from_state(removing_tps, state):
                 if tp.deut_time != np.inf and tp.deut_time != 0.0
             )
         )
-        if real_tps_num >= 3:
+        if real_tps_num >= 2:
             final_peptides.append(pep)
         else:
             num_pep_removed += 1

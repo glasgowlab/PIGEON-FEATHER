@@ -34,6 +34,8 @@ class UptakePlot:
         ax=None,
         if_d_percent=False,
         exp_only=False,
+        calculate_num_d_from_envelope=True,
+        auto_plot=True
     ):
         """
         hdxms_datas: list of class HDXMSData objects
@@ -48,6 +50,7 @@ class UptakePlot:
 
         :ivar hdxms_datas_df: pandas DataFrame of the HDX-MS data of the peptide
         """
+        self.calculate_num_d_from_envelope=calculate_num_d_from_envelope
         self.hdxms_datas = hdxms_datas
         self.identifier = identifier
         self.sequence = identifier.split(" ")[1]
@@ -60,7 +63,9 @@ class UptakePlot:
         self.exp_only = exp_only
         # self.title = self.make_title()
         # self.title = identifier
-        self.uptakeplot = self.make_uptakeplot()
+        if auto_plot:
+            self.uptakeplot = self.make_uptakeplot()
+
 
     def make_uptakeplot(self):
         "make a uptakeplot for a peptide"
@@ -100,7 +105,7 @@ class UptakePlot:
             ax=ax,
             palette=self.color_dict,
             s=600,
-            markers={1: "o", 2: "s", 3: "^", 4: "P", 5: "X", 6: "H", 7: "v", 8: "d", 9: "D", 10: "p" },
+            markers={1: "o", 2: "s", 3: "^", 4: "P", 5: "X", 6: "H", 7: "v"},
         )
 
 
@@ -116,13 +121,13 @@ class UptakePlot:
                     trialT = [
                         tp.deut_time
                         for tp in avg_peptide.timepoints
-                        if tp.deut_time != np.inf and tp.deut_time != 0
+                        if tp.deut_time != np.inf or tp.deut_time != 0
                     ]
                     y_pred = [
                         #tp.num_d
                         get_num_d_from_iso(tp)/(avg_peptide.max_d / avg_peptide.theo_max_d)
                         for tp in avg_peptide.timepoints
-                        if tp.deut_time != np.inf and tp.deut_time != 0
+                        if tp.deut_time != np.inf or tp.deut_time != 0
                     ]
                 ax.plot(
                     trialT, y_pred, "-", color=self.color_dict[state_name], alpha=0.5
@@ -192,13 +197,12 @@ class UptakePlot:
                             tp for tp in peptide.timepoints if tp.deut_time != np.inf
                         ]
 
+                    deut_list = [get_num_d_from_iso(tp)  if self.calculate_num_d_from_envelope else tp.num_d for tp in timepoint_objs]
                     peptide_df_i = pd.DataFrame(
                         {
                             "time": [tp.deut_time for tp in timepoint_objs],
-                            # "deut": [tp.num_d for tp in timepoint_objs],
-                            "deut": [
-                                get_num_d_from_iso(tp) for tp in timepoint_objs
-                            ],
+                            #"deut": [tp.num_d for tp in timepoint_objs],
+                            "deut": deut_list,
                             "state": state.state_name,
                             "charge_state": [tp.charge_state for tp in timepoint_objs],
                         }
@@ -447,14 +451,33 @@ def create_heatmap_compare(compare, colorbar_max, colormap="RdBu"):
     norm = col.Normalize(vmin=-colorbar_max, vmax=colorbar_max)
 
     for i, peptide_compare in enumerate(compare.peptide_compares):
-        for peptide in peptide_compare.peptide1_list:
-            rect = Rectangle(
-                (peptide.start, (i % 20) * 5 + ((i // 20) % 2) * 2.5),
-                peptide.end - peptide.start,
-                4,
-                fc=colormap(norm(peptide_compare.deut_diff_avg)),
-            )
-            ax.add_patch(rect)
+        #for peptide in peptide_compare.peptide1_list:
+        y_position =  i%100
+        rect = Rectangle(
+            (peptide_compare.start, (i % 20) * 5 + ((i // 20) % 2) * 2.5),
+            #(peptide_compare.start, (i % 50) * 2 + ((i // 50) % 2) * 2.5),
+            # (peptide_compare.start, y_position),
+            peptide_compare.end - peptide_compare.start,
+            3,
+            fc=colormap(norm(peptide_compare.deut_diff_avg)),
+            edgecolor='gray',
+            linewidth=0.35
+        )
+        ax.add_patch(rect)
+
+            
+    # compares = sorted(compare.peptide_compares, key=lambda x: len(x.sequence), reverse=True)
+    # for peptide_compare in compares:
+    #     rect = Rectangle(
+    #         # (peptide.start, (i % 20) * 5 + ((i // 20) % 2) * 2.5),
+    #         (peptide_compare.start, -8),
+    #         # (peptide.start, i%100),
+    #         peptide_compare.end - peptide_compare.start,
+    #         4,
+    #         fc=colormap(norm(peptide_compare.deut_diff_avg)),
+    #        alpha=0.7
+    #     )
+    #     ax.add_patch(rect)
 
     fig.colorbar(cm.ScalarMappable(cmap=colormap, norm=norm), ax=plt.gca())
 

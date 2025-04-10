@@ -673,7 +673,7 @@ class Timepoint:
 
 
 class HDXStatePeptideCompares:
-    def __init__(self, state1_list, state2_list):
+    def __init__(self, state1_list, state2_list, threshold=0):
         '''
         A class to compare peptides between two states.
 
@@ -684,6 +684,7 @@ class HDXStatePeptideCompares:
         self.state1_list = state1_list
         self.state2_list = state2_list
         self.peptide_compares = []
+        self.threshold = threshold
 
     @property
     def common_idfs(self):
@@ -707,7 +708,8 @@ class HDXStatePeptideCompares:
             peptide1_list = [state1.get_peptide(idf) for state1 in self.state1_list]
             peptide2_list = [state2.get_peptide(idf) for state2 in self.state2_list]
             peptide_compare = PeptideCompare(peptide1_list, peptide2_list)
-            peptide_compares.append(peptide_compare)
+            if abs(peptide_compare.deut_diff_avg) > self.threshold:
+                peptide_compares.append(peptide_compare)
         self.peptide_compares = sorted(
             peptide_compares,
             key=lambda x: int(re.search(r"(-?\d+)--?\d+ \w+", x.compare_info).group(1)),
@@ -766,6 +768,22 @@ class PeptideCompare:
 
         return f"{peptide1.protein_state.state_name}-{peptide2.protein_state.state_name}: {peptide1.start}-{peptide1.end} {peptide1.sequence}"
 
+    @property
+    def identifier(self):
+        return self.peptide1_list[0].identifier
+    
+    @property
+    def sequence(self):
+        return self.peptide1_list[0].sequence
+    
+    @property
+    def start(self):
+        return self.peptide1_list[0].start
+    
+    @property
+    def end(self):
+        return self.peptide1_list[0].end
+    
     @property
     def common_timepoints(self):
         'common deuteration timepoints between two peptides'
@@ -837,16 +855,16 @@ class PeptideCompare:
         result = deut1_array.mean() - deut2_array.mean()
 
         #significance test: 
-        deut1_std = np.std(deut1_array)
-        deut2_std = np.std(deut2_array)
+        # deut1_std = np.std(deut1_array)
+        # deut2_std = np.std(deut2_array)
 
-        combined_std = np.sqrt(deut1_std**2 + deut2_std**2)
+        # combined_std = np.sqrt(deut1_std**2 + deut2_std**2)
 
-        if result < combined_std: #if the result is less than combined std, it is not significant
-            result = 0
+        # if result < combined_std: #if the result is less than combined std, it is not significant
+        #     result = 0
 
-        if deut2_array.size == 1 and deut1_array.size == 1:
-            result = 0
+        # if deut2_array.size == 1 and deut1_array.size == 1:
+        #     result = 0
 
         return result
 
@@ -1185,10 +1203,11 @@ class SimulatedData:
             peptide_obj = Peptide(peptide, start, end, protein_state, n_fastamides=2)
 
             if self.random_backexchange:
-                random_back_exchange = random.uniform(0.0, 0.4)
-                _add_max_d_to_pep(peptide_obj,max_d=(1-random_back_exchange)*peptide_obj.theo_max_d)
+                true_back_exchange = random.uniform(0.0, 0.4)
+                measured_back_exchange = true_back_exchange + np.random.normal(0, 0.2) # determined by full-D experiment
+                _add_max_d_to_pep(peptide_obj,max_d=(1-measured_back_exchange)*peptide_obj.theo_max_d)
             else:
-                random_back_exchange = 0.0
+                true_back_exchange = 0.0
                 
             try:
                 protein_state.add_peptide(peptide_obj, allow_duplicate=True)
@@ -1206,12 +1225,22 @@ class SimulatedData:
                 # sort timepoints
                 timepoints.sort()
                 
+                noise_multiplier = 1.0
+                pep_length = peptide_obj.end - peptide_obj.start + 1
+                if (pep_length <= 5 or pep_length >= 15) and random.uniform(0, 1) < 0.3:
+                    noise_multiplier = 1.2
+                            
                 for tp_i, tp in enumerate(timepoints):
                     # tp_raw_deut = self.incorporations[
                     #     peptide_obj.start - 1 : peptide_obj.end
                     # ][:, tp_i]
                     tp_raw_deut = self.incorporations[tp][peptide_obj.start - 1 : peptide_obj.end]
-                    tp_raw_deut = tp_raw_deut * (1 - random_back_exchange) * self.saturation
+                    
+                    # add sidechain exchange noise, 5% of theo_max_d, only positive
+                    if tp_i != 0 and random.uniform(0, 1) < 0.3:
+                        tp_raw_deut = tp_raw_deut + random.uniform(0, 0.05) 
+                    
+                    tp_raw_deut = tp_raw_deut * (1 - true_back_exchange) * self.saturation
                     pep_incorp = sum(tp_raw_deut)
                     # random_stddev = peptide_obj.theo_max_d * self.noise_level * random.uniform(-1, 1)
                     random_stddev = 0
@@ -1241,8 +1270,11 @@ class SimulatedData:
                         ]
                     )
                     
+                    # if tp_i != 0:
+                    #     isotope_noise += np.array([random.uniform(-1, 1) * self.noise_level/10 * (1.0 + np.log10(tp)/18.0) for _ in isotope_envelope])
+                    
                     # force envelopes
-                    isotope_envelope = isotope_envelope + isotope_noise
+                    isotope_envelope = isotope_envelope + isotope_noise * noise_multiplier
                     isotope_envelope[isotope_envelope < 0] = 0
                     isotope_envelope = normlize(isotope_envelope)
                     

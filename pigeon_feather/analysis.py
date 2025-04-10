@@ -413,7 +413,7 @@ class Analysis:
         
 
     def plot_kex_bar(self, ax=None, label=None, resolution_indicator_pos=15, seq_pos=17, color=None, 
-                     show_coverage=True, show_seq=True):
+                     show_coverage=True, show_seq=True, show_residue_range=None):
         #mini_peps_index = sorted(list(set([(v[0]-1, v[1]-1) for k, v in self.maximum_resolution_limits.items()])))
         # xx = self.bayesian_hdx_df.mean().values
 
