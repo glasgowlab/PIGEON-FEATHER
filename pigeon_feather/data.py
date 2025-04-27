@@ -399,7 +399,6 @@ class Peptide:
         # self.max_d = self.get_max_d()
 
     def add_timepoint(self, timepoint, allow_duplicate=False):
-    def add_timepoint(self, timepoint, allow_duplicate=False):
         'add a timepoint to the peptide'
         # Check if timepoint already exists
         if not allow_duplicate:
