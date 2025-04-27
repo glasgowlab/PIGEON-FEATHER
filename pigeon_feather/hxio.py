@@ -167,6 +167,8 @@ def load_dataframe_to_hdxmsdata(
     protein_sequence=None,
     fulld_approx=False,
     saturation=1.0,
+    pH=None,
+    temperature=None,
 ):
     """
     Load data from dataframe to HDXMSData object
@@ -184,6 +186,8 @@ def load_dataframe_to_hdxmsdata(
         n_fastamides,
         protein_sequence=protein_sequence,
         saturation=saturation,
+        pH=pH,
+        temperature=temperature,
     )
 
     # Iterate over rows in the dataframe

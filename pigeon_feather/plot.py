@@ -34,6 +34,8 @@ class UptakePlot:
         ax=None,
         if_d_percent=False,
         exp_only=False,
+        calculate_num_d_from_envelope=True,
+        auto_plot=True
     ):
         """
         hdxms_datas: list of class HDXMSData objects
@@ -48,6 +50,7 @@ class UptakePlot:
 
         :ivar hdxms_datas_df: pandas DataFrame of the HDX-MS data of the peptide
         """
+        self.calculate_num_d_from_envelope=calculate_num_d_from_envelope
         self.hdxms_datas = hdxms_datas
         self.identifier = identifier
         self.sequence = identifier.split(" ")[1]
@@ -60,7 +63,9 @@ class UptakePlot:
         self.exp_only = exp_only
         # self.title = self.make_title()
         # self.title = identifier
-        self.uptakeplot = self.make_uptakeplot()
+        if auto_plot:
+            self.uptakeplot = self.make_uptakeplot()
+
 
     def make_uptakeplot(self):
         "make a uptakeplot for a peptide"
@@ -116,13 +121,13 @@ class UptakePlot:
                     trialT = [
                         tp.deut_time
                         for tp in avg_peptide.timepoints
-                        if tp.deut_time != np.inf and tp.deut_time != 0
+                        if tp.deut_time != np.inf or tp.deut_time != 0
                     ]
                     y_pred = [
                         #tp.num_d
                         get_num_d_from_iso(tp)/(avg_peptide.max_d / avg_peptide.theo_max_d)
                         for tp in avg_peptide.timepoints
-                        if tp.deut_time != np.inf and tp.deut_time != 0
+                        if tp.deut_time != np.inf or tp.deut_time != 0
                     ]
                 ax.plot(
                     trialT, y_pred, "-", color=self.color_dict[state_name], alpha=0.5
@@ -160,7 +165,11 @@ class UptakePlot:
         # ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.legend()
 
-        ax.set_title(self.identifier)
+        if len(self.sequence) < 20:
+            ax.set_title(self.identifier)
+        else:
+            idf = self.identifier.split(" ")[0] + " " + self.identifier.split(" ")[1][:4] + "..." + self.identifier.split(" ")[1][-4:]
+            ax.set_title(idf)
         plt.subplots_adjust(bottom=0.2)
         plt.close()
 
@@ -191,14 +200,13 @@ class UptakePlot:
                         timepoint_objs = [
                             tp for tp in peptide.timepoints if tp.deut_time != np.inf
                         ]
-
+                   
+                    deut_list = [get_num_d_from_iso(tp)  if self.calculate_num_d_from_envelope else tp.num_d for tp in timepoint_objs]
                     peptide_df_i = pd.DataFrame(
                         {
                             "time": [tp.deut_time for tp in timepoint_objs],
-                            # "deut": [tp.num_d for tp in timepoint_objs],
-                            "deut": [
-                                get_num_d_from_iso(tp) for tp in timepoint_objs
-                            ],
+                            #"deut": [tp.num_d for tp in timepoint_objs],
+                            "deut": deut_list,
                             "state": state.state_name,
                             "charge_state": [tp.charge_state for tp in timepoint_objs],
                         }

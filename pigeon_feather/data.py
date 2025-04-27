@@ -133,7 +133,7 @@ class HDXMSDataCollection:
 
 class HDXMSData:
     def __init__(
-        self, protein_name, n_fastamides=2, protein_sequence=None, saturation=1
+        self, protein_name, n_fastamides=2, protein_sequence=None, saturation=None, pH=None, temperature=None
     ):
         '''
         A class to store one HDX-MS replicate data. It can contain multiple states.
@@ -148,10 +148,12 @@ class HDXMSData:
         self.protein_name = protein_name
         self.states = []
         self.n_fastamides = n_fastamides
-        if protein_sequence is None:
-            raise ValueError("Protein sequence is required")
+        if protein_sequence is None or pH is None or temperature is None:
+            raise ValueError("Protein sequence, pH, temperature and saturation are required!")
         self.protein_sequence = protein_sequence
         self.saturation = saturation
+        self.pH = pH
+        self.temperature = temperature
 
     def add_state(self, state):
         'add a state to the HDXMSData object'
@@ -396,17 +398,18 @@ class Peptide:
 
         # self.max_d = self.get_max_d()
 
-    def add_timepoint(self, timepoint):
+    def add_timepoint(self, timepoint, allow_duplicate=False):
         'add a timepoint to the peptide'
         # Check if timepoint already exists
-        for existing_timepoint in self.timepoints:
-            if (
-                existing_timepoint.deut_time == timepoint.deut_time
-                and existing_timepoint.charge_state == timepoint.charge_state
-            ):
-                raise ValueError(
-                    f"{self.start}-{self.end} {self.sequence}: {timepoint.deut_time} (charge: {timepoint.charge_state})Timepoint already exists"
-                )
+        if not allow_duplicate:
+            for existing_timepoint in self.timepoints:
+                if (
+                    existing_timepoint.deut_time == timepoint.deut_time
+                    and existing_timepoint.charge_state == timepoint.charge_state
+                ):
+                    raise ValueError(
+                        f"{self.start}-{self.end} {self.sequence}: {timepoint.deut_time} (charge: {timepoint.charge_state})Timepoint already exists"
+                    )
 
         self.timepoints.append(timepoint)
         return timepoint
@@ -1027,25 +1030,25 @@ class SimulatedData:
     #             logP[i] = 0.0
     #     self.logP = logP
     
-    def gen_logP(self):
+    def gen_logP(self, logP_range=[2, 12]):
         prob = [0.9, 0.05, 0.05]  # 90% probability in [2, 12], 5% probability in [12, 14] or [0, 2]
         logP = []
         
         while len(logP) < self.length:
             # Generate random number based on probability
             if random.choices([1, 2, 3], weights=prob)[0] == 1:
-                new_value = random.uniform(2, 12)
+                new_value = random.uniform(logP_range[0], logP_range[1])
             elif random.choices([1, 2, 3], weights=prob)[0] == 2:
-                new_value = random.uniform(12, 14)
+                new_value = random.uniform(logP_range[1], logP_range[1]+2)
             else:
-                new_value = random.uniform(0, 2)
+                new_value = random.uniform(logP_range[0]-2, logP_range[0])
             
             # Check constraints
             if len(logP) >= 4:
                 last_four = logP[-4:]
                 if (
-                    all(x > 12 for x in last_four) and new_value > 12  # Avoid 5 consecutive values >12
-                    or all(x < 2 for x in last_four) and new_value < 2  # Avoid 5 consecutive values <2
+                    all(x > logP_range[1] for x in last_four) and new_value > logP_range[1]  # Avoid 5 consecutive values >12
+                    or all(x < logP_range[0] for x in last_four) and new_value < logP_range[0]  # Avoid 5 consecutive values <2
                 ):
                     continue  # Constraint not met, generate new value
             
@@ -1106,6 +1109,10 @@ class SimulatedData:
         while not (
             sum(covered) >= 0.9 * self.length and (num_peptides * 0.7 < num_pairs < num_peptides * 1.3)
         ):
+        #top_range = 0.9
+        #while not (
+        #    (sum(covered) <= top_range * self.length) and (sum(covered) >= (top_range-0.05) * self.length) and (num_peptides * 0.7 < num_pairs < num_peptides * 1.3)
+        #):
             random.seed(self.seed + attempt)
             attempt += 1
          
@@ -1155,13 +1162,15 @@ class SimulatedData:
 
     def convert_to_hdxms_data(self):
         'convert the simulated data to a HDXMSData object'
-        hdxms_data = HDXMSData("simulated_data", protein_sequence=self.sequence, saturation=self.saturation)
+        hdxms_data = HDXMSData("simulated_data", protein_sequence=self.sequence, saturation=self.saturation, temperature=self.temperature, pH=self.pH)
         protein_state = ProteinState("SIM", hdxms_data=hdxms_data)
         hdxms_data.add_state(protein_state)
 
         # calculate incorporation
         self.calculate_incorporation()
-
+        
+        back_ex_dict = {}
+        
         for peptide in self.peptides:
             start = self.sequence.find(peptide) + 1
             end = start + len(peptide) - 1
@@ -1169,10 +1178,15 @@ class SimulatedData:
             peptide_obj = Peptide(peptide, start, end, protein_state, n_fastamides=2)
 
             if self.random_backexchange:
-                random_back_exchange = random.uniform(0.0, 0.4)
-                _add_max_d_to_pep(peptide_obj,max_d=(1-random_back_exchange)*peptide_obj.theo_max_d)
+                if peptide_obj.identifier in back_ex_dict:
+                    true_back_exchange = back_ex_dict[peptide_obj.identifier]
+                    _add_max_d_to_pep(peptide_obj, max_d=(1-true_back_exchange)*peptide_obj.theo_max_d)
+                else:
+                    true_back_exchange = random.uniform(0.0, 0.4)
+                    _add_max_d_to_pep(peptide_obj, max_d=(1-true_back_exchange)*peptide_obj.theo_max_d)
+                    back_ex_dict[peptide_obj.identifier] = true_back_exchange
             else:
-                random_back_exchange = 0.0
+                true_back_exchange = 0.0
                 
             try:
                 protein_state.add_peptide(peptide_obj, allow_duplicate=True)
@@ -1190,12 +1204,22 @@ class SimulatedData:
                 # sort timepoints
                 timepoints.sort()
                 
+                noise_multiplier = 1.0
+                pep_length = peptide_obj.end - peptide_obj.start + 1
+                if (pep_length <= 5 or pep_length >= 15) and random.uniform(0, 1) < 0.3:
+                    noise_multiplier = 1.1
+                            
                 for tp_i, tp in enumerate(timepoints):
                     # tp_raw_deut = self.incorporations[
                     #     peptide_obj.start - 1 : peptide_obj.end
                     # ][:, tp_i]
                     tp_raw_deut = self.incorporations[tp][peptide_obj.start - 1 : peptide_obj.end]
-                    tp_raw_deut = tp_raw_deut * (1 - random_back_exchange) * self.saturation
+                    
+                    #add sidechain exchange noise, 5% of theo_max_d, only positive
+                    if tp_i != 0 and random.uniform(0, 1) < 0.3:
+                        tp_raw_deut = tp_raw_deut + random.uniform(0, 0.03) 
+                    
+                    tp_raw_deut = tp_raw_deut * (1 - true_back_exchange) * self.saturation
                     pep_incorp = sum(tp_raw_deut)
                     # random_stddev = peptide_obj.theo_max_d * self.noise_level * random.uniform(-1, 1)
                     random_stddev = 0
@@ -1220,20 +1244,34 @@ class SimulatedData:
                     # )
                     isotope_noise = np.array(
                         [
-                            random.uniform(-1, 1) * self.noise_level
+                            random.uniform(-1, 1) * self.noise_level/10 +  random.uniform(-1, 1) * self.noise_level * peak 
                             for peak in isotope_envelope
                         ]
                     )
                     
-                    tp_obj.isotope_envelope = isotope_envelope + isotope_noise
-                    tp_obj.isotope_envelope = normlize(tp_obj.isotope_envelope)
-                    # tp_obj.isotope_envelope = isotope_envelope
+                    if tp_i != 0:
+                        isotope_noise += np.array([random.uniform(-1, 1) * self.noise_level/10 * (np.log10(tp)/18) for _ in isotope_envelope])
+                    
+                    isotope_envelope = isotope_envelope + isotope_noise * noise_multiplier
+                    isotope_envelope[isotope_envelope < 0] = 0
+                    isotope_envelope = normlize(isotope_envelope)
+                    
+                    tp_obj.isotope_envelope = isotope_envelope
+                     
+                    # update num_d
+                    mass_num = np.arange(len(isotope_envelope))
+                    if tp_i == 0:
+                        t0_centroid = np.sum(isotope_envelope * mass_num)
+
+                    tp_obj.num_d = np.sum(isotope_envelope * mass_num) - t0_centroid
 
                     peptide_obj.add_timepoint(tp_obj)
 
             except Exception as e:
                 #print(e)
                 continue
+            
+        #print(back_ex_dict)
 
         self.hdxms_data = hdxms_data
 
