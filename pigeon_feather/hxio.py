@@ -354,7 +354,7 @@ def convert_dataframe_to_bayesianhdx_format(
     print(f"Data saved to {OUTPATH}")
 
 
-def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True):
+def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, back_exchange_threshold=0.4):
     """
     Load raw MS data from csv files to hdxms_data object.
     !!! use it before reindex_peptide_from_pdb
@@ -421,7 +421,7 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True):
             tp
             for pep in state.peptides
             for tp in pep.timepoints
-            if pep.max_d / pep.theo_max_d < 0.6
+            if pep.max_d / pep.theo_max_d < 1 - back_exchange_threshold
         ]
         
         print("="*20)

@@ -399,8 +399,18 @@ class Peptide:
         # self.max_d = self.get_max_d()
 
     def add_timepoint(self, timepoint, allow_duplicate=False):
+    def add_timepoint(self, timepoint, allow_duplicate=False):
         'add a timepoint to the peptide'
         # Check if timepoint already exists
+        if not allow_duplicate:
+            for existing_timepoint in self.timepoints:
+                if (
+                    existing_timepoint.deut_time == timepoint.deut_time
+                    and existing_timepoint.charge_state == timepoint.charge_state
+                ):
+                    raise ValueError(
+                        f"{self.start}-{self.end} {self.sequence}: {timepoint.deut_time} (charge: {timepoint.charge_state})Timepoint already exists"
+                    )
         if not allow_duplicate:
             for existing_timepoint in self.timepoints:
                 if (
@@ -675,7 +685,7 @@ class Timepoint:
 
 
 class HDXStatePeptideCompares:
-    def __init__(self, state1_list, state2_list):
+    def __init__(self, state1_list, state2_list, threshold=0):
         '''
         A class to compare peptides between two states.
 
@@ -686,6 +696,7 @@ class HDXStatePeptideCompares:
         self.state1_list = state1_list
         self.state2_list = state2_list
         self.peptide_compares = []
+        self.threshold = threshold
 
     @property
     def common_idfs(self):
@@ -709,7 +720,8 @@ class HDXStatePeptideCompares:
             peptide1_list = [state1.get_peptide(idf) for state1 in self.state1_list]
             peptide2_list = [state2.get_peptide(idf) for state2 in self.state2_list]
             peptide_compare = PeptideCompare(peptide1_list, peptide2_list)
-            peptide_compares.append(peptide_compare)
+            if abs(peptide_compare.deut_diff_avg) > self.threshold:
+                peptide_compares.append(peptide_compare)
         self.peptide_compares = sorted(
             peptide_compares,
             key=lambda x: int(re.search(r"(-?\d+)--?\d+ \w+", x.compare_info).group(1)),
@@ -769,6 +781,22 @@ class PeptideCompare:
         return f"{peptide1.protein_state.state_name}-{peptide2.protein_state.state_name}: {peptide1.start}-{peptide1.end} {peptide1.sequence}"
 
     @property
+    def identifier(self):
+        return self.peptide1_list[0].identifier
+    
+    @property
+    def sequence(self):
+        return self.peptide1_list[0].sequence
+    
+    @property
+    def start(self):
+        return self.peptide1_list[0].start
+    
+    @property
+    def end(self):
+        return self.peptide1_list[0].end
+    
+    @property
     def common_timepoints(self):
         'common deuteration timepoints between two peptides'
         timepoints1 = set(
@@ -821,20 +849,35 @@ class PeptideCompare:
         'deuterium difference between two peptides at a specific timepoint'
         deut1_array = np.array(
             [
-                pep1.get_deut_percent(timepoint)
+                tp.d_percent
                 for pep1 in self.peptide1_list
-                if pep1.get_deut_percent(timepoint) is not None
+                for tp in pep1.timepoints
+                if tp.deut_time == timepoint
             ]
         )
         deut2_array = np.array(
             [
-                pep2.get_deut_percent(timepoint)
+                tp.d_percent
                 for pep2 in self.peptide2_list
-                if pep2.get_deut_percent(timepoint) is not None
+                for tp in pep2.timepoints
+                if tp.deut_time == timepoint
             ]
         )
 
         result = deut1_array.mean() - deut2_array.mean()
+
+        #significance test: 
+        # deut1_std = np.std(deut1_array)
+        # deut2_std = np.std(deut2_array)
+
+        # combined_std = np.sqrt(deut1_std**2 + deut2_std**2)
+
+        # if result < combined_std: #if the result is less than combined std, it is not significant
+        #     result = 0
+
+        # if deut2_array.size == 1 and deut1_array.size == 1:
+        #     result = 0
+
         return result
 
 
