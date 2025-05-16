@@ -17,7 +17,13 @@ import warnings
 
 
 class Analysis:
-    def __init__(self, protein_state, temperature=None, pH=None, ):
+    def __init__(self, protein_state, temperature=None, pH=None, global_dg_unfolding=None):
+        '''
+        :param protein_state: list of protein state objects
+        :param temperature: temperature in K
+        :param pH: pH
+        :param global_dg_unfolding: global dg unfolding in kJ/mol
+        '''
 
         if temperature is None or pH is None:
             raise ValueError('temperature and pH are required')
@@ -37,8 +43,10 @@ class Analysis:
         self.temperature = temperature
         self.pH = pH
         self.log_k_init = np.log10(k_int_from_sequence(self.protein_sequence , temperature, pH, d_percentage=self.saturation*100))
-
-    
+        self.global_dg_unfolding = global_dg_unfolding
+        self._calculate_valid_log_kex_range()
+        self._calculate_log_kex_threshold_by_global_dg_unfolding()
+        
     def find_mini_overlap(self, peps_covering,):
 
         '''
@@ -202,6 +210,37 @@ class Analysis:
 
         bayesian_hdx_df_log_kex *= -1 # convert to -log_kex
         self.bayesian_hdx_df_log_kex = bayesian_hdx_df_log_kex
+        
+    
+    def _calculate_valid_log_kex_range(self, threshold=0.001):
+        '''
+        get the valid log_kex range by timewindow
+        '''
+        all_tps = [tp for state in self.protein_state for pep in state.peptides for tp in pep.timepoints if tp.deut_time != np.inf and tp.deut_time != 0]
+        max_time = max([tp.deut_time for tp in all_tps])
+        min_time = min([tp.deut_time for tp in all_tps])
+        
+        def single_exp_reverse(y, t):
+            return -np.log(1-y) / t
+        
+        log_kex_min = np.log10(single_exp_reverse(threshold, max_time))
+        log_kex_max = np.log10(single_exp_reverse(1-threshold, min_time))
+
+        self.log_kex_min = log_kex_min
+        self.log_kex_max = log_kex_max
+        
+    def _calculate_log_kex_threshold_by_global_dg_unfolding(self):
+        '''
+        calculate the log_kex threshold by global dg unfolding
+        '''
+        if self.global_dg_unfolding is not None:
+            log_P = np.log10(np.exp(self.global_dg_unfolding*1000 / (8.314*self.temperature)))
+            log_kex = self.log_k_init - log_P
+            self._log_kex_min_by_global_dg_unfolding = log_kex
+            self._log_P_max_by_global_dg_unfolding = log_P
+        else:
+            self._log_kex_min_by_global_dg_unfolding = None
+            self._log_P_max_by_global_dg_unfolding = None
 
 
     def load_bayesian_hdx_oupt(self, bayesian_hdx_data_file, N=50):
@@ -352,6 +391,23 @@ class Analysis:
                 res.std_within_clusters_logP = res.mini_pep.std_within_clusters_log_kex
 
 
+    def _apply_log_kex_range(self, data, resindex):
+        '''
+        data: 1D array of -log_kex
+        apply the log_kex range to the data
+        '''
+        if self.global_dg_unfolding is not None:
+            log_kch = self.log_k_init[resindex] 
+            log_P = np.log10(np.exp(self.global_dg_unfolding*1000 / (8.314*self.temperature)))
+            log_kex = log_kch - log_P
+            # data = data[data <= -1*log_kex]
+            data = np.clip(data, -10, -1*log_kex)
+        
+        # apply the log_kex range to the data
+        #data = data[(data <= -1*self.log_kex_min) & (data >= -1*self.log_kex_max)]
+        data = np.clip(data, -1*self.log_kex_max, -1*self.log_kex_min)
+        return data
+            
 
     def _clustering_a_mini_pep(self, k, v0, v1):
 
@@ -360,6 +416,9 @@ class Analysis:
         # Apply remove_outliers to each column and collect results
         #cleaned_data = [remove_outliers(self.bayesian_hdx_df[col]) for col in self.bayesian_hdx_df.iloc[:,v0-1:v1].columns] 
         cleaned_data = [remove_outliers(self.bayesian_hdx_df_log_kex[col]) for col in self.bayesian_hdx_df_log_kex.iloc[:,v0-1:v1].columns] 
+        
+        # apply the log_kex range to the data
+        # cleaned_data = [self._apply_log_kex_range(col, range(v0-1, v1)[i]) for i, col in enumerate(cleaned_data)]
         
         initial_centers = np.array([np.mean(col[:20]) for col in cleaned_data if col.size !=0]).reshape(-1, 1)  
         num_clusters = initial_centers.shape[0]
@@ -413,7 +472,7 @@ class Analysis:
         
 
     def plot_kex_bar(self, ax=None, label=None, resolution_indicator_pos=15, seq_pos=17, color=None, 
-                     show_coverage=True, show_seq=True, show_residue_range=None):
+                     show_coverage=True, show_seq=True, show_residue_range=None, show_out_of_range_indicator=True):
         #mini_peps_index = sorted(list(set([(v[0]-1, v[1]-1) for k, v in self.maximum_resolution_limits.items()])))
         # xx = self.bayesian_hdx_df.mean().values
 
@@ -423,6 +482,9 @@ class Analysis:
 
         #self.clustering_results()
         
+        ax.axhline(-self.log_kex_min, color='gray', linestyle='--', lw=1, alpha=0.5)
+        ax.axhline(-self.log_kex_max, color='gray', linestyle='--', lw=1, alpha=0.5)
+            
         xx = np.array([res.resid for res in self.results_obj.residues if res.is_nan() == False])
         yy = np.concatenate([mini_pep.clustering_results_log_kex for mini_pep in self.results_obj.mini_peps])
         yy_std = np.concatenate([mini_pep.std_within_clusters_log_kex for mini_pep in self.results_obj.mini_peps])
@@ -449,6 +511,17 @@ class Analysis:
         #manutally add the error bar
         for i in range(len(padded_xx)):
             ax.plot([i, i], [padded_yy[i]-padded_yy_std[i], padded_yy[i]+padded_yy_std[i]], color='gray', linewidth=3, alpha=0.7)
+            
+        # indicate the residues out of the log_kex range
+        if show_out_of_range_indicator:
+            mask = ((padded_yy >= -self.log_kex_min) | (padded_yy <= -self.log_kex_max)) & (padded_yy != 0)
+            sns.scatterplot(x=padded_xx[mask]-1, y=padded_yy[mask]+0.5, ax=ax, color='red', s=100, alpha=0.7)
+            
+        # indicator of the log_kex range from global dg unfolding
+        if self.global_dg_unfolding is not None:
+            #mask = (padded_yy >= -self._log_kex_min_by_global_dg_unfolding) & (padded_yy != 0)
+            mask = np.array([res.if_off_global_dg_unfolding for res in self.results_obj.residues])
+            sns.scatterplot(x=padded_xx[mask]-1, y=padded_yy[mask]-0.5, ax=ax, color='blue', s=100, alpha=0.7)
         
         #ax.bar(padded_xx, padded_yy, yerr=padded_yy_std, alpha=0.5, label=label)
         #sns.barplot(x=range(1, len(xx)+1), y=xx, alpha=0.5, label='bayesian_hdx', ax=ax)
@@ -565,8 +638,45 @@ class Residue(object):
     @property
     def log_k_init(self):
         return self.resluts_obj.log_k_init[self.resindex]
+    
+    @property
+    def _log_kex_min_by_global_dg_unfolding(self):
+        if self.resluts_obj.analysis_object._log_kex_min_by_global_dg_unfolding is None:
+            return None
+        else:
+            return self.resluts_obj.analysis_object._log_kex_min_by_global_dg_unfolding[self.resindex]
+    
+    @property
+    def _log_P_max_by_global_dg_unfolding(self):
+        if self.resluts_obj.analysis_object._log_P_max_by_global_dg_unfolding is None:
+            return None
+        else:
+            return self.resluts_obj.analysis_object._log_P_max_by_global_dg_unfolding
 
 
+    @property
+    def if_off_global_dg_unfolding(self):
+        if self._log_kex_min_by_global_dg_unfolding is None:
+            return False
+
+        if self.resname == 'P' or self.is_nan():
+            return False
+
+        return np.all(
+            self.mini_pep.clustering_results_log_kex
+            > -self._log_kex_min_by_global_dg_unfolding
+        )
+        
+    @property
+    def if_off_log_kex_range_by_time_window(self):
+        if self.resname == 'P' or self.is_nan():
+            return False
+
+        return np.all(
+            self.mini_pep.clustering_results_log_kex > -self.resluts_obj.analysis_object.log_kex_min
+        ) or np.all(
+            self.mini_pep.clustering_results_log_kex < -self.resluts_obj.analysis_object.log_kex_max
+        )
         
 class MiniPep(object):
     '''
