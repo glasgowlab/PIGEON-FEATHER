@@ -575,9 +575,9 @@ def parse_args():
     parser.add_argument('--r', '--rangeslist', dest='rangeslist', nargs='+', help="rangeslist output")
     parser.add_argument('--n', '--nums', dest='nums', help="diagnostic stats output")
 
-    parser.add_argument('--maxz', dest='maxz', type=float, help='max charge for peptides')
-    parser.add_argument('--minl', dest='minl', type=float, help='min length for peptides')
-    parser.add_argument('--maxl', dest='maxl', type=float, help='max length for peptides')
+    parser.add_argument('--maxz', dest='maxz', type=int, help='max charge for peptides')
+    parser.add_argument('--minl', dest='minl', type=int, help='min length for peptides')
+    parser.add_argument('--maxl', dest='maxl', type=int, help='max length for peptides')
     parser.add_argument('--ppmc_w', dest='ppmc_wide', type=float, help='ppm error cutoff for initial match')
     parser.add_argument('--ppmc_n', dest='ppmc_narrow', type=float, help='ppm cutoff after curve fit')
     parser.add_argument('--scorec', dest='scorec', type=float, help='score threshold for initial curve fit')
