@@ -938,6 +938,7 @@ def generate_bayesian_hdx_script(
     rerun_num=3,
     extreme_value_prior=False,
     structural_prior=False,
+    global_dG_unfolding=None,
 ):
     """
     Generates a script for the Bayesian HDX analysis based on the provided parameters and a template file.
@@ -947,10 +948,16 @@ def generate_bayesian_hdx_script(
     :param protein_state: The state of the protein.
     :param base_directory: The base directory for the data.
     :param template_file: Path to the template file.
+    :param global_dG_unfolding: The global dG unfolding in kJ/mol
     :return: A string containing the generated script.
     """
     # Read the template from the file
     pigeon_feather_path = os.path.dirname(os.path.abspath(__file__))
+    
+    if global_dG_unfolding is not None:
+        PF_lower_bound, PF_upper_bound = 0, 14
+    else:
+        PF_lower_bound, PF_upper_bound = 0, (global_dG_unfolding + 8.4)*1000/8.314/temperature/np.log(10) # add 2 kcal/mol for the error allowance
     
     if making_chunks:
         with open(f"{pigeon_feather_path}/lib/run_bayesian_hdx_template_chunks2.txt", "r") as file:
@@ -981,7 +988,9 @@ def generate_bayesian_hdx_script(
             temperature=temperature,
             saturation=saturation,
             rerun_num=rerun_num,
-            chunk_size=chunk_size
+            chunk_size=chunk_size,
+            PF_lower_bound=PF_lower_bound,
+            PF_upper_bound=PF_upper_bound
         )
     else:
         # Generate the script using the template
@@ -994,7 +1003,9 @@ def generate_bayesian_hdx_script(
             pH=pH,
             temperature=temperature,
             saturation=saturation,
-            rerun_num=rerun_num
+            rerun_num=rerun_num,
+            PF_lower_bound=PF_lower_bound,
+            PF_upper_bound=PF_upper_bound
         )
 
     def add_prior_lines(extreme_value_prior, structural_prior, state_name):
