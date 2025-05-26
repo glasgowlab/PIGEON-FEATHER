@@ -652,7 +652,23 @@ class Residue(object):
             return None
         else:
             return self.resluts_obj.analysis_object._log_P_max_by_global_dg_unfolding
-
+        
+    @property
+    def _capped_log_kex(self):
+        if self.if_slow_exchanger:
+            return -self.resluts_obj.analysis_object.log_kex_min
+        elif self.if_fast_exchanger:
+            return -self.resluts_obj.analysis_object.log_kex_max
+        else:
+            raise Exception('residue is not a slow or fast exchanger')
+        
+    @property
+    def _capped_log_P(self):
+        if self.if_slow_exchanger or self.if_fast_exchanger:
+            return self.log_k_init + self._capped_log_kex
+        else:
+            raise Exception('residue is not a slow or fast exchanger')
+            
 
     @property
     def if_off_global_dg_unfolding(self):
@@ -672,11 +688,26 @@ class Residue(object):
         if self.resname == 'P' or self.is_nan():
             return False
 
+        return self.if_slow_exchanger or self.if_fast_exchanger
+        
+    @property
+    def if_slow_exchanger(self):
+        if self.resname == 'P' or self.is_nan():
+            return False
+
         return np.all(
             self.mini_pep.clustering_results_log_kex > -self.resluts_obj.analysis_object.log_kex_min
-        ) or np.all(
+        )
+        
+    @property
+    def if_fast_exchanger(self):
+        if self.resname == 'P' or self.is_nan():
+            return False
+
+        return np.all(
             self.mini_pep.clustering_results_log_kex < -self.resluts_obj.analysis_object.log_kex_max
         )
+        
         
 class MiniPep(object):
     '''
@@ -763,6 +794,9 @@ class BFactorPlot(object):
         for res_i, _ in enumerate(self.analysis_object_1.results_obj.protein_sequence):
             res = self.analysis_object_1.results_obj.get_residue_by_resindex(res_i)
             avg_logP, std_logP = get_res_avg_logP(res)
+            
+            if res.if_off_log_kex_range_by_time_window:
+                avg_logP = res._capped_log_P
 
             if std_logP > self.logP_threshold:
                 avg_logP = np.nan
@@ -798,6 +832,12 @@ class BFactorPlot(object):
 
             avg_logP_1, std_logP_1 = get_res_avg_logP(res_obj_1)
             avg_logP_2, std_logP_2 = get_res_avg_logP(res_obj_2)
+            
+            if res_obj_1.if_off_log_kex_range_by_time_window:
+                avg_logP_1 = res_obj_1._capped_log_P
+
+            if res_obj_2.if_off_log_kex_range_by_time_window:
+                avg_logP_2 = res_obj_2._capped_log_P
 
             combined_std = np.sqrt(std_logP_1 ** 2 + std_logP_2 ** 2)
 
@@ -1504,7 +1544,7 @@ def get_avg_envelope_uptake_errors(protein_states, ana_obj, res):
 
 
 
-def if_off_time_window(log_kex, time_window, threshold=0.001):
+def if_off_time_window(log_kex, time_window, threshold=0.01):
     if (
         calculate_simple_deuterium_incorporation(log_kex, time_window[0])
         > 1 - threshold
