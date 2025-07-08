@@ -389,6 +389,7 @@ class Analysis:
             if hasattr(res, 'mini_pep'):
                 res.clustering_results_logP = np.array([res.log_k_init + i for i in res.mini_pep.clustering_results_log_kex]) # log_kex is negative
                 res.std_within_clusters_logP = res.mini_pep.std_within_clusters_log_kex
+                res.SE_within_clusters_logP = res.mini_pep.SE_within_clusters_log_kex
 
 
     def _apply_log_kex_range(self, data, resindex):
@@ -445,7 +446,7 @@ class Analysis:
                 cluster_mask = k_cluster.labels_ == i
                 cluster_points = pool_values[cluster_mask]
                 center = k_cluster.cluster_centers_[i]
-                std_within_cluster[i] = np.std(cluster_points)
+                std_within_cluster[i] = np.std(cluster_points, ddof=1)
                 data_within_cluster[i] = cluster_points
                 
 
@@ -724,6 +725,10 @@ class MiniPep(object):
         self.std_within_clusters_log_kex = clustering_results[1]
         self.data_within_clusters = clustering_results[2]
         
+        # standard error of the mean
+        self.n_samples = np.array([estimate_effective_sample_size(self.data_within_clusters[i]) for i in range(len(self.clustering_results_log_kex))])
+        self.SE_within_clusters_log_kex = self.std_within_clusters_log_kex / np.sqrt(self.n_samples)
+        
     def if_single_residue(self):
         return self.start == self.end
     
@@ -793,7 +798,7 @@ class BFactorPlot(object):
 
         for res_i, _ in enumerate(self.analysis_object_1.results_obj.protein_sequence):
             res = self.analysis_object_1.results_obj.get_residue_by_resindex(res_i)
-            avg_logP, std_logP = get_res_avg_logP(res)
+            avg_logP, std_logP, avg_ = get_res_avg_logP(res)
             
             if res.if_off_log_kex_range_by_time_window:
                 avg_logP = res._capped_log_P
@@ -830,27 +835,24 @@ class BFactorPlot(object):
                 res_i
             )
 
-            avg_logP_1, std_logP_1 = get_res_avg_logP(res_obj_1)
-            avg_logP_2, std_logP_2 = get_res_avg_logP(res_obj_2)
+            avg_logP_1, std_logP_1, SE_logP_1 = get_res_avg_logP(res_obj_1)
+            avg_logP_2, std_logP_2, SE_logP_2 = get_res_avg_logP(res_obj_2)
             
-            if res_obj_1.if_off_log_kex_range_by_time_window:
-                avg_logP_1 = res_obj_1._capped_log_P
+            
+            # if res_obj_1.if_off_log_kex_range_by_time_window:
+            #     avg_logP_1 = res_obj_1._capped_log_P
 
-            if res_obj_2.if_off_log_kex_range_by_time_window:
-                avg_logP_2 = res_obj_2._capped_log_P
+            # if res_obj_2.if_off_log_kex_range_by_time_window:
+            #     avg_logP_2 = res_obj_2._capped_log_P
+            diff_logP = avg_logP_1 - avg_logP_2
+            combined_SE = np.sqrt(SE_logP_1 ** 2 + SE_logP_2 ** 2)
 
-            combined_std = np.sqrt(std_logP_1 ** 2 + std_logP_2 ** 2)
-
-            # if not siginificant difference, 0.35 is the grid size
-            if (
-                abs(avg_logP_1 - avg_logP_2) < max(combined_std, 0.35)
-                and combined_std <= self.logP_threshold
-            ):
-                continue
-            elif combined_std > self.logP_threshold:
-                diff_logP = np.nan
-            else:
-                diff_logP = avg_logP_1 - avg_logP_2
+            # if not siginificant difference, 0.35 is the grid size, white
+            if abs(diff_logP) < max(combined_SE, 0.35) and combined_SE <= self.logP_threshold:
+                diff_logP = 0.0  
+            # too noisy → gray
+            elif combined_SE > self.logP_threshold:
+                diff_logP = np.nan  
 
             protein_res = u.select_atoms(
                 f"protein and resid {res_obj_1.resid - self.index_offset}"
@@ -1461,17 +1463,19 @@ def get_res_avg_logP(res_obj):
     '''
 
     if res_obj.is_nan():
-        return np.nan, 0.0
+        return np.nan, 0.0, 0.0
     if res_obj.resname == "P":
-        return 0.0, 0.0
+        return 0.0, 0.0, 0.0
     else:
         logPs = [i for i in res_obj.clustering_results_logP if i != np.inf and not np.isnan(i)]
         stds = [i for i in res_obj.std_within_clusters_logP if i != np.inf and not np.isnan(i)]
+        SEs = [i for i in res_obj.SE_within_clusters_logP if i != np.inf and not np.isnan(i)]
 
         avg_logP = np.mean(logPs)
-        avg_std = np.sqrt(np.sum(np.square(stds)) / len(stds) ** 2)
+        avg_std = np.mean(stds)
+        SE_logP = np.sqrt(np.sum(np.square(SEs)) / len(SEs) ** 2)
 
-        return avg_logP, avg_std
+        return avg_logP, avg_std, SE_logP    
 
 
 def get_res_avg_logP_std(res_obj):
@@ -1488,7 +1492,7 @@ def get_res_avg_logP_std(res_obj):
     else:
 
         stds = [i for i in res_obj.std_within_clusters_logP if i != np.inf and not np.isnan(i)]
-        avg_std = np.sqrt(np.sum(np.square(stds)) / len(stds) ** 2)
+        avg_std = np.mean(stds)
 
         return avg_std
 
@@ -1582,3 +1586,46 @@ def get_index_offset(
 
     
     return index_offset
+
+
+def estimate_effective_sample_size(x):
+    """
+    Estimate effective sample size using autocorrelation time (ACT).
+    x: 1D array of samples
+    Returns: effective sample size
+    """
+    if isinstance(x, float):
+        return 1.0
+    
+    n = len(x)
+
+    if n < 2:
+        return float(n)
+
+    if np.var(x) < 1e-9:
+        return 1.0
+
+    x_centered = x - np.mean(x)
+    
+    full_acf = np.correlate(x_centered, x_centered, mode='full')
+    acf = full_acf[n-1:]
+
+    lag0_acf = acf[0]
+    if lag0_acf < 1e-9:
+        return 1.0
+    acf = acf / lag0_acf
+
+    cutoff_indices = np.where(acf <= 0)[0]
+    
+    if len(cutoff_indices) == 0 or cutoff_indices[0] == 0:
+        first_non_positive_lag_k = n
+    else:
+        first_non_positive_lag_k = cutoff_indices[0]
+
+    if first_non_positive_lag_k <= 1:
+        tau = 1.0
+    else:
+        tau = 1 + 2 * np.sum(acf[1:first_non_positive_lag_k])
+
+    n_eff = n / tau
+    return max(1.0, n_eff)
