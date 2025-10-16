@@ -12,7 +12,7 @@ PIGEON-FEATHER can be used from Jupyter Notebook (recommended), or by writing Py
 
 The tutorials notebooks could be found at docs/source/tutorials.
 
-## Compatibiliy with HXMS format 
+## Compatibility with HXMS format
 
 [HXMS](https://www.biorxiv.org/content/10.1101/2025.10.14.682397v1) is a unified, lightweight, and human-readable file format that preserves full isotopic envelopes and experimental conditions for HX/MS data. We recommend using HXMS with FEATHER. HXMS files can be generated using [PFLink](https://huggingface.co/spaces/glasgow-lab/PFLink), which supports exports from BioPharma Finder, HDExaminer, DynamX, and HDX Workbench.  
 
