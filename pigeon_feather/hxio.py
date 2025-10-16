@@ -272,31 +272,22 @@ def revert_hdxmsdata_to_dataframe(hdxms_data, if_percent=False):
                 t_inf_same_charge = pep.get_timepoint(np.inf, timepoint.charge_state)
                 # Dictionary to hold data for this timepoint
 
-                # raw idf with fastamides
-                if pep.n_fastamides == 2:
-                    (
-                        start,
-                        end,
-                    ) = pep.identifier.split(" ")[0].split("-")
-                    start, end = int(start), int(end)
-                    seq = pep.identifier.split(" ")[1]
-                elif pep.n_fastamides == 0:
-                    start = pep.start - 2
-                    end = pep.end
-                    seq = hdxms_data.protein_sequence[
-                        start - 1 : end
-                    ]  # -1 to account for python indexing
+                
+                raw_start = int(timepoint.peptide.identifier.split(" ")[0].split("-")[0])
+                raw_end = int(timepoint.peptide.identifier.split(" ")[0].split("-")[1])
+                raw_seq = timepoint.peptide.identifier.split(" ")[1]   
+
 
                 data_dict = {
                     "Protein State": state.state_name,
-                    "Sequence": seq,
-                    "Start": start,
-                    "End": end,
+                    "Sequence": raw_seq,
+                    "Start": raw_start,
+                    "End": raw_end,
                     "Deut Time (sec)": timepoint.deut_time,
-                    "#D": timepoint.num_d,
-                    "Stddev": timepoint.stddev,
+                    "#D": float(timepoint.num_d),
+                    "Stddev": float(timepoint.stddev),
                     "Charge": str(timepoint.charge_state),
-                    "Max #D": pep.max_d,
+                    "Max #D": float(pep.max_d),
                     "timepoint_unique_id": timepoint.unique_id,
                 }
                 if if_percent:
@@ -461,20 +452,23 @@ def export_iso_files(hdxms_data, outdir, overwrite=True):
         state = tp.peptide.protein_state.state_name
 
         # raw idf with fastamides
-        if tp.peptide.n_fastamides == 2:
-            (
-                start,
-                end,
-            ) = tp.peptide.identifier.split(" ")[0].split("-")
-            seq = tp.peptide.identifier.split(" ")[1]
-        elif tp.peptide.n_fastamides == 0:
-            start = tp.peptide.start - 2
-            end = tp.peptide.end
-            seq = hdxms_data.protein_sequence[
-                start - 1 : end
-            ]  # -1 to account for python indexing
+        raw_start = int(tp.peptide.identifier.split(" ")[0].split("-")[0])
+        raw_end = int(tp.peptide.identifier.split(" ")[0].split("-")[1])
+        raw_seq = tp.peptide.identifier.split(" ")[1]   
+        # if tp.peptide.n_fastamides == 2:
+        #     (
+        #         start,
+        #         end,
+        #     ) = tp.peptide.identifier.split(" ")[0].split("-")
+        #     seq = tp.peptide.identifier.split(" ")[1]
+        # elif tp.peptide.n_fastamides == 0:
+        #     start = tp.peptide.start - 2
+        #     end = tp.peptide.end
+        #     seq = hdxms_data.protein_sequence[
+        #         start - 1 : end
+        #     ]  # -1 to account for python indexing
 
-        idf = f"{start}-{end}-{seq}"
+        idf = f"{raw_start}-{raw_end}-{raw_seq}"
         npy_file_name = f"{state}_{idf}_tp{int(tp.deut_time)}_ch{tp.charge_state}_{tp.unique_id}.npy"
         np.save(os.path.join(outdir, npy_file_name), tp.isotope_envelope)
     print(f"Isotope files saved to {outdir}")
@@ -482,7 +476,7 @@ def export_iso_files(hdxms_data, outdir, overwrite=True):
 
 
 
-def get_all_statics_info(hdxms_datas):
+def get_all_statics_info(hdxms_datas, print_output=True):
     # Ensure input is a list for consistent processing
     if not isinstance(hdxms_datas, list):
         hdxms_datas = [hdxms_datas]
@@ -526,17 +520,24 @@ def get_all_statics_info(hdxms_datas):
     redundancy = np.mean(coverage)
 
     # Print formatted output
-    print("=" * 60)
-    print(" "*20 + "HDX-MS Data Statistics")
-    print("=" * 60)
-    print(f"States names: {state_names}")
-    print(f"Time course (s): {avg_timepoints}")
-    print(f"Number of time points: {len(avg_timepoints)}")
-    print(f"Protein sequence length: {len(protein_sequence)}")
-    print(f"Average coverage: {coverage_non_zero:.2f}")
-    print(f"Number of unique peptides: {len(unique_peptides)}")
-    print(f"Average peptide length: {avg_pep_length:.1f}")
-    print(f"Redundancy (based on average coverage): {redundancy:.1f}")
-    print(f"Average peptide length to redundancy ratio: {avg_pep_length / redundancy:.1f}")
-    print(f"Backexchange average, IQR: {np.mean(backexchange_rates):.2f}" + f", {iqr_backexchange:.2f}")
-    print("=" * 60)
+    stats_text = (
+        "=" * 60 + "\n" +
+        " " * 20 + "HDX-MS Data Statistics\n" +
+        "=" * 60 + "\n" +
+        f"States names: {state_names}\n" +
+        f"Time course (s): {avg_timepoints}\n" +
+        f"Number of time points: {len(avg_timepoints)}\n" +
+        f"Protein sequence length: {len(protein_sequence)}\n" +
+        f"Average coverage: {coverage_non_zero:.2f}\n" +
+        f"Number of unique peptides: {len(unique_peptides)}\n" +
+        f"Average peptide length: {avg_pep_length:.1f}\n" +
+        f"Redundancy (based on average coverage): {redundancy:.1f}\n" +
+        f"Average peptide length to redundancy ratio: {avg_pep_length / redundancy:.1f}\n" +
+        f"Backexchange average, IQR: {np.mean(backexchange_rates):.2f}, {iqr_backexchange:.2f}\n" +
+        "=" * 60
+    )
+    
+    if print_output:
+        print(stats_text)
+    
+    return stats_text
