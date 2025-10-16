@@ -954,7 +954,7 @@ def generate_bayesian_hdx_script(
     # Read the template from the file
     pigeon_feather_path = os.path.dirname(os.path.abspath(__file__))
     
-    if global_dG_unfolding is not None:
+    if global_dG_unfolding is None:
         PF_lower_bound, PF_upper_bound = 0, 14
     else:
         PF_lower_bound, PF_upper_bound = 0, (global_dG_unfolding + 8.4)*1000/8.314/temperature/np.log(10) # add 2 kcal/mol for the error allowance

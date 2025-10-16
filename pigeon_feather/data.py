@@ -380,6 +380,10 @@ class Peptide:
         :ivar note: a note for the peptide
         '''
         
+        self.raw_start = raw_start
+        self.raw_end = raw_end
+        self.raw_sequence = raw_sequence
+        self.n_fastamides = n_fastamides
         
         self.identifier = (
             f"{raw_start}-{raw_end} {raw_sequence}"  # raw sequence without any modification
@@ -422,6 +426,10 @@ class Peptide:
 
         self.timepoints.append(timepoint)
         return timepoint
+    
+    @property
+    def id(self):
+        return self.identifier
 
     @property
     def num_timepoints(self):

@@ -385,12 +385,6 @@ class Analysis:
         self.results_obj = results
 
 
-        for res in results.residues:
-            if hasattr(res, 'mini_pep'):
-                res.clustering_results_logP = np.array([res.log_k_init + i for i in res.mini_pep.clustering_results_log_kex]) # log_kex is negative
-                res.std_within_clusters_logP = res.mini_pep.std_within_clusters_log_kex
-                res.SE_within_clusters_logP = res.mini_pep.SE_within_clusters_log_kex
-
 
     def _apply_log_kex_range(self, data, resindex):
         '''
@@ -567,6 +561,118 @@ class Analysis:
             # num_tps = len([tp for tp in pep.timepoints if tp.deut_time != 0 and tp.deut_time != np.inf])
             # coverage[pep.start-1:pep.end] += num_tps
         return coverage
+    
+    
+    def pro_iso_correction(self, pdb_file):
+        '''
+        Apply Proline Isomerization Correction to the data when comparing dGop values to global dG unfolding
+        Reference: nature structural biology 6.10 (1999): 910-912.
+        '''
+        
+        def get_pro_type(omega):
+            if abs(omega) < 90:
+                return "cis"
+            else:
+                return "trans"
+            
+        def get_pro_iso_corr_term(residue_obj, pro_type):
+            
+            xaa_pro_K = {
+            'P': 15.67,
+            'K': 13.71,
+            'R': 12.89,
+            'D': 12.70,
+            'A': 12.00,
+            'C': 10.49,
+            'E': 10.11,
+            'T': 9.64,
+            'H': 9.53,
+            'M': 9.00,
+            'V': 8.62,
+            'Q': 7.70,
+            'N': 7.62,
+            'L': 7.33,
+            'I': 7.33,
+            'G': 6.30,
+            'H+': 5.06,
+            'F': 3.35,
+            'Y': 3.20,
+            'W': 1.65,
+            "S": 8.62,
+            }
+            
+            R = 8.314
+            temperature = residue_obj.resluts_obj.analysis_object.temperature
+            
+            if residue_obj.resname == "H":
+                if residue_obj.resluts_obj.analysis_object.pH < 7:
+                    key = "H+"
+                else:
+                    key = "H"
+            else:
+                key = residue_obj.resname
+                
+            if pro_type == "cis":
+                return R * temperature * np.log(1+xaa_pro_K[key])/1000 # kJ/mol
+            elif pro_type == "trans":
+                return R * temperature * np.log(1+xaa_pro_K[key]**-1)/1000 # kJ/mol
+            
+        
+        # get proline type from the pdb file    
+        from pigeon_feather.analysis import get_index_offset
+        index_offset = get_index_offset(self, pdb_file)
+        import MDAnalysis
+        from MDAnalysis.analysis.dihedrals import Dihedral
+        
+        # get all Pro residues
+        pro_residues = [res for res in self.results_obj.residues if res.resname == "P" and not res.is_nan()]
+        
+        u = MDAnalysis.Universe(pdb_file)
+
+        for res in pro_residues:
+            resid_i = int(res.resid)
+            
+            res_i    = u.select_atoms(f"protein and resid {resid_i}")
+            res_ip1  = u.select_atoms(f"protein and resid {resid_i+1}")
+
+            if res_i.n_atoms == 0 or res_ip1.n_atoms == 0:
+                res.pro_type = "NA_no_next_residue"
+
+            CA_i = res_i.atoms.select_atoms("name CA")[0]
+            C_i = res_i.atoms.select_atoms("name C")[0]
+            
+            N_ip1 = res_ip1.atoms.select_atoms("name N")[0]
+            CA_ip1 = res_ip1.atoms.select_atoms("name CA")[0]
+            
+
+            
+            # # Create one AtomGroup containing all four atoms
+            dihedral_group = MDAnalysis.AtomGroup([CA_i, C_i, N_ip1, CA_ip1])
+            
+            #print(dihedral_atoms)
+
+            # Pass the AtomGroup as a single-element list
+            dih = Dihedral([dihedral_group]).run()
+            omega = dih.results.angles[0][0]
+            res.pro_type = get_pro_type(omega)
+            
+            
+        for res_i, _ in enumerate(self.results_obj.protein_sequence):
+            res_obj_i = self.results_obj.get_residue_by_resindex(res_i)  
+            
+            if res_i < len(self.results_obj.protein_sequence) - 1:
+                res_obj_ip1 = self.results_obj.get_residue_by_resindex(res_i+1)
+            
+                if res_obj_ip1.resname == "P" and res_obj_ip1.is_nan() == False:
+                    pro_iso_corr_term = get_pro_iso_corr_term(res_obj_i, res_obj_ip1.pro_type)
+                    res_obj_i.pro_iso_corr_term = pro_iso_corr_term
+                else:
+                    res_obj_i.pro_iso_corr_term = 0
+                    
+            else:
+                res_obj_i.pro_iso_corr_term = 0
+                
+                        
 
 
 class Results(object):
@@ -639,6 +745,27 @@ class Residue(object):
     @property
     def log_k_init(self):
         return self.resluts_obj.log_k_init[self.resindex]
+    
+    @property
+    def clustering_results_logP(self):
+        if hasattr(self, 'mini_pep'):
+            return np.array([self.log_k_init + i for i in self.mini_pep.clustering_results_log_kex])
+        else: 
+            return None
+    
+    @property
+    def std_within_clusters_logP(self):
+        if hasattr(self, 'mini_pep'):
+            return self.mini_pep.std_within_clusters_log_kex
+        else:
+            return None
+    
+    @property
+    def SE_within_clusters_logP(self):
+        if hasattr(self, 'mini_pep'):
+            return self.mini_pep.SE_within_clusters_log_kex
+        else:
+            return None
     
     @property
     def _log_kex_min_by_global_dg_unfolding(self):
