@@ -12,6 +12,21 @@ PIGEON-FEATHER can be used from Jupyter Notebook (recommended), or by writing Py
 
 The tutorials notebooks could be found at docs/source/tutorials.
 
+## Compatibiliy with HXMS format 
+
+[HXMS](https://www.biorxiv.org/content/10.1101/2025.10.14.682397v1) is a unified, lightweight, and human-readable file format that preserves full isotopic envelopes and experimental conditions for HX/MS data. We recommend using HXMS with FEATHER. HXMS files can be generated using [PFLink](https://huggingface.co/spaces/glasgow-lab/PFLink), which supports exports from BioPharma Finder, HDExaminer, DynamX, and HDX Workbench.  
+
+You can easily read and write HXMS files using **FEATHER**:
+```python
+from pigeon_feather.hxio import load_HXMS_files, write_HXMS_files
+
+hdxms_data = load_HXMS_files(["./ecDHFR_APO.hxms",
+                              "./ecDHFR_TRI.hxms"])
+
+write_HXMS_files([hdxms_data], protein_name="ecDHFR", output_dir=".")
+```
+
+
 ## Installation
 
 ```

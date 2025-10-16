@@ -5,8 +5,11 @@ import time
 import numpy as np
 import pandas as pd
 
+import pigeon_feather
 from pigeon_feather.spectra import refine_large_error_reps
 import pigeon_feather.tools as tools
+import pigeon_feather.data as data
+from datetime import datetime
 
 
 def read_hdx_tables(tables, ranges, exclude=False, states_subset=None):
@@ -541,3 +544,231 @@ def get_all_statics_info(hdxms_datas, print_output=True):
         print(stats_text)
     
     return stats_text
+
+
+def parse_line(raw_line, delimiter=" "):
+    line = []
+    for i in raw_line.strip().split(delimiter):
+        if i != "":
+            line.append(i)
+    return line
+
+def load_HXMS_files(hxms_files, n_fastamides=2):
+    'load a list of HXMS files and return a merged HDXMSData object'
+    
+    datasets_list = []
+    for hxms_file in hxms_files:
+        datasets_list.append(load_HXMS_file(hxms_file, n_fastamides))
+    return tools.merge_hdxms_datasets(datasets_list)
+
+def load_HXMS_file(hxms_file, n_fastamides=2):
+    'load a HXMS file and return a HDXMSData object'
+    
+    with open(hxms_file, "r") as f:
+        raw_lines = f.readlines()
+
+    METADATA = {}
+    TP_LINES = []
+
+    for line in raw_lines:
+        if line.startswith("METADATA"):
+            parsed_line = parse_line(line, " ")
+            METADATA[parsed_line[1]] = parsed_line[2]
+        elif line.startswith("TP"):
+            TP_LINES.append(parse_line(line, " "))
+
+    # check if all metadata is present
+    if not all(key in METADATA for key in ["PROTEIN_SEQUENCE", "TEMPERATURE(K)", "pH(READ)", "D2O_SATURATION"]):
+        raise ValueError("Not all metadata is present")
+
+    state_name = METADATA["PROTEIN_STATE"] if "PROTEIN_STATE" in METADATA else "TEST"
+    protein_name = METADATA["PROTEIN_NAME"] if "PROTEIN_NAME" in METADATA else "TEST"
+    protein_sequence = METADATA["PROTEIN_SEQUENCE"]
+    temperature = float(METADATA["TEMPERATURE(K)"])
+    ph = float(METADATA["pH(READ)"])
+    saturation = float(METADATA["D2O_SATURATION"])
+
+    hdxms_data = data.HDXMSData(
+        protein_name,
+        n_fastamides,
+        protein_sequence=protein_sequence,
+        saturation=saturation,
+        temperature=temperature,
+        pH=ph,
+    )
+
+    # Iterate over rows in the dataframe
+    for row in TP_LINES:
+        
+        MOD = row[2]
+        START = int(row[3])
+        END = int(row[4])
+        REP = int(row[5])
+        PTM_ID = row[6]
+        TIME = float(row[7])
+        UPTAKE = float(row[8])
+        # check if envelope is empty
+        if row[-1] == "":
+            ENVELOPE = None
+        else:
+            ENVELOPE = np.array([float(val) for val in row[-1].split(",")])
+        
+        # Check if protein state exists
+        protein_state = None
+        for state in hdxms_data.states:
+            if state.state_name == state_name:
+                protein_state = state
+                break
+
+        # If protein state does not exist, create and add to HDXMSData
+        if not protein_state:
+            protein_state = data.ProteinState(state_name, hdxms_data=hdxms_data)
+            hdxms_data.add_state(protein_state)
+
+        # Check if peptide exists in current state
+        peptide_sequence = protein_sequence[START - 1 : END]
+
+        peptide = None
+        for pep in protein_state.peptides:
+            # identifier = f"{row['Start']+n_fastamides}-{row['End']} {row['Sequence'][n_fastamides:]}"
+            identifier = f"{START}-{END} {peptide_sequence}"
+            if pep.identifier == identifier:
+                peptide = pep
+                break
+
+        # If peptide does not exist, create and add to ProteinState
+        if not peptide:
+            # skip if peptide is less than 4 residues
+            # if len(peptide_sequence) < 4:
+            #     continue
+            peptide = data.Peptide(
+                peptide_sequence,
+                START,
+                END,
+                protein_state,
+                n_fastamides=n_fastamides,
+                # RT=0,
+            )
+            protein_state.add_peptide(peptide)
+
+        # Add timepoint data to peptide
+        timepoint = data.Timepoint(
+            peptide,
+            TIME,
+            UPTAKE,
+            0,
+            1,
+        )
+
+        timepoint.isotope_envelope = ENVELOPE
+
+        peptide.add_timepoint(timepoint, allow_duplicate=True)
+
+    return hdxms_data
+
+
+def write_HXMS_files(hdxms_data_list, protein_name, output_dir="."):
+    'write HXMS files for a list of HDXMSData objects'
+    
+    # check temperature, pH and saturation are the same for all data
+    if len(set([data.temperature for data in hdxms_data_list])) > 1:
+        raise ValueError("All data must have the same temperature")
+    if len(set([data.pH for data in hdxms_data_list])) > 1:
+        raise ValueError("All data must have the same pH")
+    if len(set([data.saturation for data in hdxms_data_list])) > 1:
+        raise ValueError("All data must have the same saturation")
+
+    state_names = set([state.state_name for data in hdxms_data_list for state in data.states])
+    
+    # add replicate index to the timepoints
+    for data_idx, data in enumerate(hdxms_data_list):
+        for state in data.states:
+            for pep in state.peptides:
+                for tp in pep.timepoints:
+                    tp.replicate_index = data_idx
+    
+    # add PTM index to the peptides
+    for data_idx, data in enumerate(hdxms_data_list):
+        for state in data.states:
+            for pep_idx, pep in enumerate(state.peptides):
+                for tp in pep.timepoints:
+                    tp.peptide.PTM_ID = "0000"
+    
+    
+    for state_name in state_names:
+        
+        protein_states = [state for data in hdxms_data_list for state in data.states if state.state_name == state_name]
+        all_peptides = [pep for state in protein_states for pep in state.peptides]
+        all_timepoints = [tp for pep in all_peptides for tp in pep.timepoints]
+        
+        hdxms_data_obj = protein_states[0].hdxms_data
+
+        HEADER = (
+            f"HEADER      HX/MS DATA FORMAT v1.0 {datetime.now().strftime('%Y-%m-%d')}\n"
+            f"HEADER      Hydrogen Exchange Mass Spectrometry Data\n"
+            # f"REMARK100\n"
+            # f"REMARK100 DOI:\n"
+            f"METADATA    PROTEIN_SEQUENCE    {hdxms_data_obj.protein_sequence}\n"
+            f"METADATA    PROTEIN_NAME        {hdxms_data_obj.protein_name}\n"
+            f"METADATA    PROTEIN_STATE       {state_name}\n"
+            f"METADATA    TEMPERATURE(K)      {hdxms_data_obj.temperature}\n"
+            f"METADATA    pH(READ)            {hdxms_data_obj.pH}\n"
+            f"METADATA    D2O_SATURATION      {hdxms_data_obj.saturation}\n"
+            f"METADATA    DATATYPE            ENVELOPE\n"
+        )
+
+        TP_COLTITLE = (
+            f"{'TITLE_TP':<12}"
+            f"{'INDEX':<8}"
+            f"{'MOD':<6}"
+            f"{'START':<7}"
+            f"{'END':<7}"
+            f"{'REP':<5}"
+            f"{'PTM_ID':<8}"
+            f"{'TIME(Sec)':<16}"
+            f"{'UPTAKE':<9}"
+            f"ENVELOPE\n"
+        )
+
+        TP_LINES = []
+        for tp_idx,tp in enumerate(all_timepoints):
+        
+            line = (
+                f"{'TP':<12}"              # TP: 10 char left align
+                f"{tp_idx:<8}"             # INDEX: 8 char left align
+                f"{'A':<6}"                # MOD: 6 char left align
+                f"{tp.peptide.start-hdxms_data_obj.n_fastamides:<7}"   # START: 7 char left align
+                f"{tp.peptide.end:<7}"     # END: 7 char left align
+                f"{tp.replicate_index:<5}"    # REP: 7 char left align
+                f"{tp.peptide.PTM_ID:<8}"  # PTM_ID: 7 char left align
+                f"{tp.deut_time:<16.6e}"   # TIME(Sec): left align in scientific notation
+                f"{tp.num_d:<9.2f}"        # UPTAKE: 9 char left align
+                f"{','.join(f'{val:.3f}' for val in tools.custom_pad(tp.isotope_envelope[:50], 50)) if tp.deut_time != np.inf else ''}"  # ENVELOPE values
+                f"\n"
+            )
+            TP_LINES.append(line)
+
+        #PTM_COLTITLE = 'TITLE_PTM   PTM_ID  CONTENT\n'
+        PTM_dict = {"0000": ["NAN"]}
+        PTM_LINES = []
+        for PTM_ID, PTM in PTM_dict.items():
+            line = (
+                f"{'PTM':<12}"              # PTM: 12 char left align
+                f"{PTM_ID:<8}"             # PTM_ID: 10 char left align
+                f"{','.join(str(val) for val in PTM)}\n"  # CONTENT, comma separated, ends with newline
+            )
+            PTM_LINES.append(line)
+
+            
+        hxms_file = f"{output_dir}/{protein_name}_{state_name}.hxms"
+
+        with open(hxms_file, 'w') as f:
+            f.write(HEADER)
+            f.write(TP_COLTITLE)
+            for line in TP_LINES:
+                f.write(line)
+            #f.write(PTM_COLTITLE)
+            for line in PTM_LINES:
+                f.write(line)
+
+        print(f"Wrote {hxms_file}")

@@ -403,7 +403,19 @@ def average_timepoints(tps_list):
 
 
 
-def merge_hdxms_datas(hdxms_datas, states_subset=None):
+def merge_hdxms_datasets(hdxms_datas, states_subset=None, protein_name=None):
+    
+    # check if the seq, pH, temperature, saturation, n_fastamides are the same for all hdxms_datas
+    if len(set([data.protein_sequence for data in hdxms_datas])) != 1:
+        raise ValueError("Protein sequences are not the same")
+    if len(set([data.pH for data in hdxms_datas])) != 1:
+        raise ValueError("pH are not the same")
+    if len(set([data.temperature for data in hdxms_datas])) != 1:
+        raise ValueError("Temperature are not the same")
+    if len(set([data.saturation for data in hdxms_datas])) != 1:
+        raise ValueError("Saturation are not the same")
+    if len(set([data.n_fastamides for data in hdxms_datas])) != 1:
+        raise ValueError("n_fastamides are not the same")
 
 
     from pigeon_feather.data import HDXMSData, ProteinState, Peptide
@@ -427,12 +439,12 @@ def merge_hdxms_datas(hdxms_datas, states_subset=None):
 
 
     hdxms_data_merged = HDXMSData(
-        "merged data",
-        2,
+        protein_name if protein_name is not None else hdxms_datas[0].protein_name,
+        n_fastamides=hdxms_datas[0].n_fastamides,
         protein_sequence=protein_sequence,
         saturation=hdxms_datas[0].saturation,
         pH=hdxms_datas[0].pH,
-        temperature=hdxms_datas[0].temperature,
+        temperature=hdxms_datas[0].temperature
     )
 
 
@@ -455,7 +467,7 @@ def merge_hdxms_datas(hdxms_datas, states_subset=None):
                 raw_start,
                 raw_end,
                 protein_state,
-                n_fastamides=2,
+                n_fastamides=hdxms_datas[0].n_fastamides,
             )
             protein_state.add_peptide(peptide)
         else:
