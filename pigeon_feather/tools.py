@@ -431,6 +431,8 @@ def merge_hdxms_datas(hdxms_datas, states_subset=None):
         2,
         protein_sequence=protein_sequence,
         saturation=hdxms_datas[0].saturation,
+        pH=hdxms_datas[0].pH,
+        temperature=hdxms_datas[0].temperature,
     )
 
 
@@ -759,7 +761,6 @@ def remove_tps_from_state(removing_tps, state):
             num_pep_removed += 1
             peptides_removed.append(pep)
             # print(f"{pep.identifier} removed")
-
     state.peptides = new_peptides
 
 
@@ -772,7 +773,7 @@ def remove_tps_from_state(removing_tps, state):
                 if tp.deut_time != np.inf and tp.deut_time != 0.0
             )
         )
-        if real_tps_num >= 2:
+        if real_tps_num >= 1:
             final_peptides.append(pep)
         else:
             num_pep_removed += 1
@@ -954,7 +955,7 @@ def generate_bayesian_hdx_script(
     # Read the template from the file
     pigeon_feather_path = os.path.dirname(os.path.abspath(__file__))
     
-    if global_dG_unfolding is not None:
+    if global_dG_unfolding is None:
         PF_lower_bound, PF_upper_bound = 0, 14
     else:
         PF_lower_bound, PF_upper_bound = 0, (global_dG_unfolding + 8.4)*1000/8.314/temperature/np.log(10) # add 2 kcal/mol for the error allowance

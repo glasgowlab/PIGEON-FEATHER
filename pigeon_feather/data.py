@@ -658,6 +658,7 @@ class Timepoint:
         self.charge_state = charge_state
         self.unique_id = str(uuid.uuid4())
         self.note = None
+        self.isotope_envelope = None
 
     def load_raw_ms_csv(self, csv_file):
         'load raw mass spec data from a HDExaminer csv file'

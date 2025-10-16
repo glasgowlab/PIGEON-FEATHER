@@ -259,14 +259,14 @@ class Analysis:
         df_be_list_all = []  
         df_sidechain_ex_list_all = []
         range_chunks = [(i*chunk_size+1, (i+1)*chunk_size) for i in range(chunk_num)]
-        print(range_chunks)
+        #print(range_chunks)
 
         for run_index in range(1, run_num+1):
             df_list_i = []
             df_be_list_i = []
             df_sidechain_ex_list_i = []
             bayesian_hdx_data_files = sorted([os.path.join(bayesian_hdx_data_folder, f) for f in os.listdir(bayesian_hdx_data_folder) if f.endswith(f'{run_index}.dat') and state_name in f])
-            print(f"Found {len(bayesian_hdx_data_files)} files for state {state_name}, run {run_index}")
+            #print(f"Found {len(bayesian_hdx_data_files)} files for state {state_name}, run {run_index}")
 
             for i, chunk in enumerate(range_chunks):
                 # if i >= len(bayesian_hdx_data_files):

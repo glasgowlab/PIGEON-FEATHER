@@ -80,7 +80,7 @@ def process_tp_frame(header, bigdf, tp_chunk, new_df):
     tp_df.drop(0, inplace=True)
     tp_df = pd.concat([header, tp_df], axis=1)
     if tp_time.startswith("Full-D"):
-        tp_df["Deut Time (sec)"] = np.Inf
+        tp_df["Deut Time (sec)"] = np.inf
     else:
         tp_df["Deut Time (sec)"] = float(tp_time.split("s")[0])
 
@@ -367,7 +367,7 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, 
         folders = sorted(glob(state_raw_spectra_path + "/*"))
 
         for folder in folders:
-            start, end, seq = folder.split("/")[-1].split("-")
+            start, end, seq = os.path.basename(folder).split("-")
             # start, end, seq = int(start)+2, int(end), seq[2:]     # skip first two res
             start, end, seq = int(start), int(end), seq
             pep_idf = f"{start}-{end} {seq}"
@@ -409,7 +409,6 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, 
                     # print(peptide.identifier, tp.deut_time, tp.charge_state)
                     # print(csv_file_path)
                     raise Warning(f"Error loading raw MS data for {peptide.identifier} at {tp.deut_time}s, charge {tp.charge_state}: {csv_file_path}")
-
 
         bad_timepoints = [
             tp
