@@ -24,10 +24,6 @@ from pigeon_feather.tools import (
     normlize
 )
 import pigeon_feather.spectra as spectra
-from pigeon_feather.hxio import (
-    convert_dataframe_to_bayesianhdx_format,
-    revert_hdxmsdata_to_dataframe,
-)
 from hdxrate import k_int_from_sequence
 import uuid
 
@@ -215,10 +211,12 @@ class HDXMSData:
 
     def to_dataframe(self, if_percent=False):
         'convert the HDXMSData object to a dataframe'
+        from pigeon_feather.hxio import revert_hdxmsdata_to_dataframe
         return revert_hdxmsdata_to_dataframe(self, if_percent=if_percent)
 
     def to_bayesianhdx_format(self, OUTPATH=None):
         'convert the HDXMSData object to BayesianHDX format and save to a file'
+        from pigeon_feather.hxio import convert_dataframe_to_bayesianhdx_format
         convert_dataframe_to_bayesianhdx_format(
             self.to_dataframe(), self.protein_name, OUTPATH
         )
