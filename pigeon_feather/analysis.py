@@ -854,7 +854,10 @@ class MiniPep(object):
         
         # standard error of the mean
         self.n_samples = np.array([estimate_effective_sample_size(self.data_within_clusters[i]) for i in range(len(self.clustering_results_log_kex))])
-        self.SE_within_clusters_log_kex = self.std_within_clusters_log_kex / np.sqrt(self.n_samples)
+    
+    @property
+    def SE_within_clusters_log_kex(self):
+        return self.std_within_clusters_log_kex / np.sqrt(self.n_samples)
         
     def if_single_residue(self):
         return self.start == self.end
