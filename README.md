@@ -73,4 +73,4 @@ click and run
 ## Citation
 If you use PIGEON-FEATHER in scientific work, please cite:
 
-> C. Lu*, M. L. Wells*, A. Reckers, and A. Glasgow, “Site-resolved energetic information from HX/MS experiments.” bioRxiv, 2024. (*equal contributions) [link to preprint](https://www.biorxiv.org/content/10.1101/2024.08.04.606547v1)
+> Lu, C.*; Wells, M. L.*; Reckers, A.; McBride, S. K.; Glasgow, A. Site-Resolved Energetic Information from HX–MS Experiments. *Nat Chem Biol* **2025**, *1–11*. (*equal contributions) https://doi.org/10.1038/s41589-025-02049-1
