@@ -865,7 +865,8 @@ class UptakePlot:
         if_d_percent=False,
         exp_only=False,
         calculate_num_d_from_envelope=True,
-        auto_plot=True
+        auto_plot=True,
+        markers={1: "o", 2: "s", 3: "^", 4: "P", 5: "X", 6: "H", 7: "v"}
     ):
         """
         hdxms_datas: list of class HDXMSData objects
@@ -895,6 +896,8 @@ class UptakePlot:
         # self.title = identifier
         if auto_plot:
             self.uptakeplot = self.make_uptakeplot()
+            
+        self.markers = markers
 
 
     def make_uptakeplot(self):
@@ -908,23 +911,6 @@ class UptakePlot:
             figure = self.figure
             ax = self.ax
 
-        scatter_shapes = [
-            "o",
-            "v",
-            "^",
-            "<",
-            ">",
-            "s",
-            "p",
-            "*",
-            "h",
-            "H",
-            "D",
-            "d",
-            "P",
-            "X",
-        ]
-
         sns.scatterplot(
             data=self.hdxms_datas_df[self.hdxms_datas_df["time"] != 0],
             x="time",
@@ -935,7 +921,7 @@ class UptakePlot:
             ax=ax,
             palette=self.color_dict,
             s=600,
-            markers={1: "o", 2: "s", 3: "^", 4: "P", 5: "X", 6: "H", 7: "v"},
+            markers=self.markers,
         )
 
 
