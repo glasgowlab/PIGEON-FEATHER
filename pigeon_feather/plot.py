@@ -894,10 +894,9 @@ class UptakePlot:
         self.exp_only = exp_only
         # self.title = self.make_title()
         # self.title = identifier
+        self.markers = markers
         if auto_plot:
             self.uptakeplot = self.make_uptakeplot()
-            
-        self.markers = markers
 
 
     def make_uptakeplot(self):
