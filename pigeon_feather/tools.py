@@ -889,8 +889,10 @@ def backexchange_correction(hdxms_data_list):
     for pep in all_peps:
         if all_inf_tps_grouped[(pep.identifier,)] != []:
             target_key = (pep.identifier,)
+            pep.is_max_d_estimated = False
         else:
             target_key = find_closest_key(keys, (pep.identifier,))
+            pep.is_max_d_estimated = True
             #print(pep.identifier, target_key)
 
         max_d_ratios = [
