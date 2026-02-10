@@ -68,7 +68,7 @@ def process_table(table):
     for chunk in chunks:
         new_df = process_tp_frame(header, bigdf, chunk, new_df)
 
-    new_df["State"] = new_df["State"].str.upper().str[:3]
+    new_df["State"] = new_df["State"] #.str.upper().str[:3]
 
     return new_df
 
