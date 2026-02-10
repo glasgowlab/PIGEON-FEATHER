@@ -666,14 +666,14 @@ class Timepoint:
         self.note = None
         self.isotope_envelope = None
 
-    def load_raw_ms_csv(self, csv_file):
+    def load_raw_ms_csv(self, csv_file, save_match=False):
         'load raw mass spec data from a HDExaminer csv file'
         df = pd.read_csv(csv_file, names=["m/z", "Intensity"])
         # normalize intensity to sum to 1
         # df['Intensity'] = df['Intensity'] / df['Intensity'].sum()
         self.raw_ms = df
 
-        iso = spectra.get_isotope_envelope(self, add_sn_ratio_to_tp=True)
+        iso = spectra.get_isotope_envelope(self, add_sn_ratio_to_tp=True, save_match=save_match)
         if iso is not None:
             self.isotope_envelope = iso["Intensity"].values
         else:

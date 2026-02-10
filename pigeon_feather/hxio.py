@@ -348,7 +348,7 @@ def convert_dataframe_to_bayesianhdx_format(
     print(f"Data saved to {OUTPATH}")
 
 
-def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, back_exchange_threshold=0.4):
+def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, back_exchange_threshold=0.4, save_match=False):
     """
     Load raw MS data from csv files to hdxms_data object.
     !!! use it before reindex_peptide_from_pdb
@@ -398,7 +398,7 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, 
                     csv_name = f"{int(tp.deut_time)}s-1-z{tp.charge_state}.csv"
                     csv_file_path = os.path.join(pep_sub_folder, csv_name)
                 try:
-                    df = tp.load_raw_ms_csv(csv_file_path)
+                    df = tp.load_raw_ms_csv(csv_file_path, save_match=save_match)
                 except:
                     # print(peptide.identifier, tp.deut_time, tp.charge_state)
                     # print(csv_file_path)

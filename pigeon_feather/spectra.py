@@ -160,7 +160,7 @@ def filter_outliers(peaks, highest_peak_index):
     return filtered_peaks
 
 
-def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False):
+def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False, save_match=False):
     #print(f'{replicate.peptide.sequence} {replicate.timepoint.time} {replicate.charge_state}')
     
     # Step 1: create the spectrum object
@@ -237,7 +237,7 @@ def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False):
 
     filtered_mz = selected_mz[selected_peak_indexes_1]
     filtered_intensity = selected_intensity[selected_peak_indexes_1]
-    filtered_sn_ratio = selected_mz[selected_peak_indexes_1]
+    filtered_sn_ratio = sn_ratio[selected_peak_indexes_1]
 
 
     selected_peak_indexes_2 = np.arange(max(np.argmax(filtered_intensity)-5, 0), 
@@ -251,6 +251,7 @@ def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False):
     })
 
     # round m/z to integer
+    selected_df['m/z_raw'] = selected_df['m/z'].values
     selected_df['m/z'] = selected_df['m/z'].apply(round)
 
     # if bad drop replicate
@@ -273,6 +274,44 @@ def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False):
     selected_df['Intensity'] /= selected_df['Intensity'].sum()
     
     
+    #    mz_values = timepoint.raw_ms['m/z'].values*timepoint.charge_state - (mfull + 1.007276466812 * timepoint.charge_state)
+    if save_match:
+        timepoint.match = (selected_df['m/z_raw'].values + (mfull + 1.007276466812 * timepoint.charge_state)) / timepoint.charge_state
+        timepoint.mono_mz = mfull
+        
+        # extract fine structure (uncentroided)
+        timepoint.raw_ms_fine_structure = []
+        raw_mz_all = timepoint.raw_ms['m/z'].values
+        raw_int_all = timepoint.raw_ms['Intensity'].values
+
+        for match_i in timepoint.match:
+            mask = (raw_mz_all >= match_i - 0.1) & (raw_mz_all <= match_i + 0.1)
+            indices = np.where(mask)[0]
+            if len(indices) == 0:
+                timepoint.raw_ms_fine_structure.append((np.array([np.nan]), np.array([np.nan])))
+                continue
+
+            local_int = raw_int_all[indices]
+            center_local = np.argmax(local_int)
+
+            # walk left: monotonically decreasing
+            left = center_local
+            while left > 0 and local_int[left-1] > 0 and local_int[left - 1] <= local_int[left] * 1.05:
+                left -= 1
+
+            # walk right: monotonically decreasing
+            right = center_local
+            while right < len(local_int) - 1 and local_int[right+1] > 0 and local_int[right + 1] <= local_int[right] * 1.05:
+                right += 1
+
+            peak_indices = indices[left:right + 1]
+            timepoint.raw_ms_fine_structure.append(
+                (raw_mz_all[peak_indices], raw_int_all[peak_indices])
+            )
+            # timepoint.raw_ms_fine_structure.append(
+            #     list(zip(raw_mz_all[peak_indices], raw_int_all[peak_indices]))
+            # )
+        
     return selected_df
 
 
