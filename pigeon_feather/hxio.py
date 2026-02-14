@@ -27,6 +27,7 @@ def read_hdx_tables(tables, ranges, exclude=False, states_subset=None):
         newbigdf["End"] = newbigdf["End"].apply(np.int64)
         newbigdf["#D"] = newbigdf["#D"].apply(float)
         newbigdf["Search RT"] = newbigdf["Search RT"].apply(float)
+        newbigdf["Score"] = newbigdf["Score"].apply(float)
         cleaned = load_ranges_file(range_file, newbigdf, exclude)
         cleaned_list.append(cleaned)
 
@@ -96,7 +97,7 @@ def clean_data_df(df):
     # Group by the specified columns and aggregate the specified columns with mean, std, and count
     df = df.groupby(
         ["Sequence", "Deut Time (sec)", "State", "Start", "End", "Charge"]
-    )[["#D", "Search RT"]].agg(["mean", "std", "count"])
+    )[["#D", "Search RT", "Score"]].agg(["mean", "std", "count"])
     
     # Flatten the MultiIndex columns created by agg
     df.columns = ['_'.join(col).strip() for col in df.columns.values]
@@ -109,12 +110,13 @@ def clean_data_df(df):
             "#D_std": "Stddev",
             "#D_count": "#Rep",
             "State": "Protein State",
-            "Search RT_mean": "RT"
+            "Search RT_mean": "RT",
+            "Score_mean": "Score"
         },
         inplace=True,
     )
     
-    df.drop(columns=["Search RT_std", "Search RT_count"], inplace=True)
+    df.drop(columns=["Search RT_std", "Search RT_count", "Score_std", "Score_count"], inplace=True)
     
     # add 0 timepoint if not present
     if 0 not in df["Deut Time (sec)"].unique():
@@ -123,6 +125,7 @@ def clean_data_df(df):
         
         # Set the specified columns to 0
         tp0s[["Deut Time (sec)", "#D", "Stddev"]] = 0
+        tp0s["Score"] = 1
         
         # Set "#Rep" to 1
         tp0s["#Rep"] = 1
@@ -239,6 +242,7 @@ def load_dataframe_to_hdxmsdata(
             row["#D"],
             row["Stddev"],
             int(row["Charge"]),
+            score=row["Score"],
         )
 
         # if timepoint has no data, skip
