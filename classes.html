@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pigeon_feather.data.RangeList &mdash; pigeon_feather 0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=049aceee"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="tutorial.html" />
+    <link rel="prev" title="FEATHER" href="feather.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pigeon_feather
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="documentation.html">Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hdx.html">HDX/MS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pigeon.html">PIGEON</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="feather.html">FEATHER</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="feather.html#classes">classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pigeon_feather.data.RangeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-data-hdxmsdatacollection">pigeon_feather.data.HDXMSDataCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-data-hdxmsdata">pigeon_feather.data.HDXMSData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-data-proteinstate">pigeon_feather.data.ProteinState</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-data-peptide">pigeon_feather.data.Peptide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-data-timepoint">pigeon_feather.data.Timepoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-hdxstatepeptidecompares">pigeon_feather.HDXStatePeptideCompares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-peptidecompare">pigeon_feather.PeptideCompare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-hdxstateresiduecompares">pigeon_feather.HDXStateResidueCompares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-residuecompare">pigeon_feather.ResidueCompare</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-simulateddata">pigeon_feather.SimulatedData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-plot-uptakeplotscollection">pigeon_feather.plot.UptakePlotsCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pigeon-feather-plot-uptakeplot">pigeon_feather.plot.UptakePlot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pigeon_feather</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="documentation.html">Documentation</a></li>
+          <li class="breadcrumb-item"><a href="feather.html">FEATHER</a></li>
+      <li class="breadcrumb-item active">pigeon_feather.data.RangeList</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pigeon-feather-data-rangelist">
+<h1>pigeon_feather.data.RangeList<a class="headerlink" href="#pigeon-feather-data-rangelist" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.RangeList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">RangeList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_list_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.RangeList" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.RangeList.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_list_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.RangeList.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to handle a list of peptides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>range_list_file</strong> – csv file with Start, End columns</p></li>
+<li><p><strong>range_df</strong> – a dataframe</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>range_list</strong> – a dataframe with Start, End columns</p></li>
+<li><p><strong>range_set</strong> – a set of tuples (Start, End)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_set</span></code>()</p></td>
+<td><p>convert the range list to a set of tuples (Start, End)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dataframe</span></code>()</p></td>
+<td><p>return the range list as a dataframe</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_csv</span></code>(path)</p></td>
+<td><p>save the range list to a csv file</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code>(other)</p></td>
+<td><p>return the union of two range lists</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code>(other)</p></td>
+<td><p>return the intersection of two range lists</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">difference</span></code>(other)</p></td>
+<td><p>return the difference of two range lists</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-data-hdxmsdatacollection">
+<h1>pigeon_feather.data.HDXMSDataCollection<a class="headerlink" href="#pigeon-feather-data-hdxmsdatacollection" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXMSDataCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">HDXMSDataCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdxms_data_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXMSDataCollection" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXMSDataCollection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdxms_data_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXMSDataCollection.__init__" title="Link to this definition"></a></dt>
+<dd><p>A cloolection of HDXMSData objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hdxms_data_list</strong> – a list of HDXMSData objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-data-hdxmsdata">
+<h1>pigeon_feather.data.HDXMSData<a class="headerlink" href="#pigeon-feather-data-hdxmsdata" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXMSData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">HDXMSData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fastamides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saturation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXMSData" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXMSData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fastamides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saturation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXMSData.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to store one HDX-MS replicate data. It can contain multiple states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protein_name</strong> – string, name of the protein</p></li>
+<li><p><strong>n_fastamides</strong> – int, defaults to 2</p></li>
+<li><p><strong>protein_sequence</strong> – string</p></li>
+<li><p><strong>saturation</strong> – D saturation, defaults to 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>states</strong> – a list of ProteinState objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_state</span></code>(state)</p></td>
+<td><p>add a state to the HDXMSData object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_protein_sequence</span></code>(sequence)</p></td>
+<td><p>load protein sequence to the HDXMSData object</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code>(state_name)</p></td>
+<td><p>return a state by name</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_res_coverage</span></code>()</p></td>
+<td><p>plot residue coverage of the protein</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex_peptide_from_pdb</span></code>(pdb_file[, ...])</p></td>
+<td><p>reindex peptides based on the pdb file, aften there is a index offset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dataframe</span></code>([if_percent])</p></td>
+<td><p>convert the HDXMSData object to a dataframe</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_bayesianhdx_format</span></code>([OUTPATH])</p></td>
+<td><p>convert the HDXMSData object to BayesianHDX format and save to a file</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_states</span></code></p></td>
+<td><p>return the number of states in the HDXMSData object</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-data-proteinstate">
+<h1>pigeon_feather.data.ProteinState<a class="headerlink" href="#pigeon-feather-data-proteinstate" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.ProteinState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">ProteinState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdxms_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.ProteinState" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.ProteinState.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdxms_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.ProteinState.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to store one state of a protein. It can contain multiple peptides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_name</strong> – name of the state</p></li>
+<li><p><strong>hdxms_data</strong> – HDXMSData object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>peptides</strong> – a list of Peptide objects</p></li>
+<li><p><strong>if_subtracted</strong> – if subtracted peptides have been added</p></li>
+<li><p><strong>num_subtracted_added</strong> – number of subtracted peptides added</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_peptide</span></code>(peptide[, allow_duplicate])</p></td>
+<td><p>add a peptide to the ProteinState object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_peptides</span></code></p></td>
+<td><p>return the number of peptides in the ProteinState</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_peptide</span></code>(identifier)</p></td>
+<td><p>return a peptide by identifier</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_new_peptides_by_subtract</span></code>()</p></td>
+<td><p>add new peptides to the protein state by subtracting the overlapped peptides</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_all_subtract</span></code>()</p></td>
+<td><p>add all possible subtracted peptides to the protein state</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-data-peptide">
+<h1>pigeon_feather.data.Peptide<a class="headerlink" href="#pigeon-feather-data-peptide" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.Peptide">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">Peptide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fastamides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.Peptide" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.Peptide.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protein_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fastamides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.Peptide.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to store one peptide. It can contain multiple timepoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_sequence</strong> – peptide sequence</p></li>
+<li><p><strong>raw_start</strong> – peptide start residue number, including fastamides, 1-based</p></li>
+<li><p><strong>raw_end</strong> – peptide end residue number, including fastamides, 1-based</p></li>
+<li><p><strong>protein_state</strong> – ProteinState it belongs to</p></li>
+<li><p><strong>n_fastamides</strong> – number of fastamides</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>identifier</strong> – used for peptide identification, raw sequence including fastamides, e.g. “1-10 ABCDEFGHIJ”</p></li>
+<li><p><strong>sequence</strong> – peptide sequence excluding fastamides, 1-based</p></li>
+<li><p><strong>start</strong> – peptide start residue number excluding fastamides, 1-based</p></li>
+<li><p><strong>end</strong> – peptide end residue number, 1-based</p></li>
+<li><p><strong>timepoints</strong> – a list of Timepoint objects</p></li>
+<li><p><strong>note</strong> – a note for the peptide</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_timepoint</span></code>(timepoint[, allow_duplicate])</p></td>
+<td><p>add a timepoint to the peptide</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_deut</span></code>(deut_time)</p></td>
+<td><p>return deuterium num at a specific deuteration time</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_deut_percent</span></code>(deut_time)</p></td>
+<td><p>return normalized deuterium incorporation at a specific deuteration time</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_timepoint</span></code>(deut_time[, charge_state])</p></td>
+<td><p>return a timepoint by deuteration time and charge state</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-data-timepoint">
+<h1>pigeon_feather.data.Timepoint<a class="headerlink" href="#pigeon-feather-data-timepoint" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.Timepoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">Timepoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peptide</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deut_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.Timepoint" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.Timepoint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peptide</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deut_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.Timepoint.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to store one timepoint of a peptide.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>peptide</strong> – Peptide object it belongs to</p></li>
+<li><p><strong>deut_time</strong> – deuteration time</p></li>
+<li><p><strong>num_d</strong> – number of deuterium incorporated</p></li>
+<li><p><strong>stddev</strong> – standard deviation of the number of deuterium incorporated</p></li>
+<li><p><strong>charge_state</strong> – charge state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_raw_ms_csv</span></code>(csv_file[, save_match])</p></td>
+<td><p>load raw mass spec data from a HDExaminer csv file</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-hdxstatepeptidecompares">
+<h1>pigeon_feather.HDXStatePeptideCompares<a class="headerlink" href="#pigeon-feather-hdxstatepeptidecompares" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXStatePeptideCompares">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">HDXStatePeptideCompares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXStatePeptideCompares" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXStatePeptideCompares.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXStatePeptideCompares.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to compare peptides between two states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state1_list</strong> – a list of ProteinState objects</p></li>
+<li><p><strong>state2_list</strong> – a list of ProteinState objects</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_all_compare</span></code>()</p></td>
+<td><p>add all possible peptide compares between two states</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dataframe</span></code>()</p></td>
+<td><p>convert the HDXStatePeptideCompares object to a dataframe</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-peptidecompare">
+<h1>pigeon_feather.PeptideCompare<a class="headerlink" href="#pigeon-feather-peptidecompare" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.PeptideCompare">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">PeptideCompare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peptide1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peptide2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.PeptideCompare" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.PeptideCompare.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peptide1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peptide2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.PeptideCompare.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to compare one peptide between two states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>peptide1_list</strong> – a list of Peptide objects</p></li>
+<li><p><strong>peptide2_list</strong> – a list of Peptide objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if peptides have different sequences</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_deut_diff</span></code>(timepoint)</p></td>
+<td><p>deuterium difference between two peptides at a specific timepoint</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-hdxstateresiduecompares">
+<h1>pigeon_feather.HDXStateResidueCompares<a class="headerlink" href="#pigeon-feather-hdxstateresiduecompares" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXStateResidueCompares">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">HDXStateResidueCompares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXStateResidueCompares" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.HDXStateResidueCompares.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.HDXStateResidueCompares.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to compare pseudo residues between two states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resids</strong> – a list of residue numbers</p></li>
+<li><p><strong>state1_list</strong> – a list of ProteinState objects</p></li>
+<li><p><strong>state2_list</strong> – a list of ProteinState objects</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_all_compare</span></code>()</p></td>
+<td><p>add all possible residue compares between two states</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_residue_compare</span></code>(resid)</p></td>
+<td><p>return a residue compare by residue number</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-residuecompare">
+<h1>pigeon_feather.ResidueCompare<a class="headerlink" href="#pigeon-feather-residuecompare" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.ResidueCompare">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">ResidueCompare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.ResidueCompare" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.ResidueCompare.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.ResidueCompare.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to compare one pseudo residue between two states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resid</strong> – residue number, 1-based</p></li>
+<li><p><strong>state1_list</strong> – a list of ProteinState objects</p></li>
+<li><p><strong>state2_list</strong> – a list of ProteinState objects</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_peptides_containing_res</span></code>(state_list)</p></td>
+<td><p>find peptides containing the residue in a state list</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_deut_diff</span></code>(timepoint)</p></td>
+<td><p>deuterium difference between two residues at a specific timepoint</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-simulateddata">
+<h1>pigeon_feather.SimulatedData<a class="headerlink" href="#pigeon-feather-simulateddata" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.data.SimulatedData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.data.</span></span><span class="sig-name descname"><span class="pre">SimulatedData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saturation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_backexchange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_timepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">293.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.SimulatedData" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.data.SimulatedData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saturation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_backexchange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_timepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">293.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.data.SimulatedData.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to generate simulated HDX-MS data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> – protein length, defaults to 100</p></li>
+<li><p><strong>seed</strong> – random seeds, defaults to 42</p></li>
+<li><p><strong>noise_level</strong> – noise add to the isotopic envelope</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_seq</span></code>()</p></td>
+<td><p>generate a random protein sequence of the given length</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_logP</span></code>([logP_range])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cal_k_init</span></code>()</p></td>
+<td><p>calculate intrinsic exchange rate for each residue</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cal_k_ex</span></code>()</p></td>
+<td><p>calculate exchange rate for each residue</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_incorporation</span></code>()</p></td>
+<td><p>calculate deuterium incorporation for each residue</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_peptides</span></code>([min_len, max_len, ...])</p></td>
+<td><p>generate random peptides from the protein sequence</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_hdxms_data</span></code>()</p></td>
+<td><p>convert the simulated data to a HDXMSData object</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-plot-uptakeplotscollection">
+<h1>pigeon_feather.plot.UptakePlotsCollection<a class="headerlink" href="#pigeon-feather-plot-uptakeplotscollection" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.plot.UptakePlotsCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.plot.</span></span><span class="sig-name descname"><span class="pre">UptakePlotsCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.plot.UptakePlotsCollection" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.plot.UptakePlotsCollection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdb_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.plot.UptakePlotsCollection.__init__" title="Link to this definition"></a></dt>
+<dd><p>A class to store multiple UptakePlot objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color_dict</strong> – a dictionary of colors for each state, e.g. {‘state1’: ‘red’, ‘state2’: ‘blue’}</p></li>
+<li><p><strong>if_plot_fit</strong> – if True, plot the fit line</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_plot</span></code>(hdxms_datas, idf[, ...])</p></td>
+<td><p>add a UptakePlot of a peptide to the collection</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_plot_all</span></code>(hdxms_datas)</p></td>
+<td><p>add UptakePlot objects of all peptides to the collection</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_plots</span></code>(path)</p></td>
+<td><p>save all plots to a folder</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+<section id="pigeon-feather-plot-uptakeplot">
+<h1>pigeon_feather.plot.UptakePlot<a class="headerlink" href="#pigeon-feather-plot-uptakeplot" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pigeon_feather.plot.UptakePlot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pigeon_feather.plot.</span></span><span class="sig-name descname"><span class="pre">UptakePlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdxms_datas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">states_subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_d_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculate_num_d_from_envelope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{1:</span> <span class="pre">'o',</span> <span class="pre">2:</span> <span class="pre">'s',</span> <span class="pre">3:</span> <span class="pre">'^',</span> <span class="pre">4:</span> <span class="pre">'P',</span> <span class="pre">5:</span> <span class="pre">'X',</span> <span class="pre">6:</span> <span class="pre">'H',</span> <span class="pre">7:</span> <span class="pre">'v'}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.plot.UptakePlot" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pigeon_feather.plot.UptakePlot.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdxms_datas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">states_subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_plot_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_d_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculate_num_d_from_envelope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{1:</span> <span class="pre">'o',</span> <span class="pre">2:</span> <span class="pre">'s',</span> <span class="pre">3:</span> <span class="pre">'^',</span> <span class="pre">4:</span> <span class="pre">'P',</span> <span class="pre">5:</span> <span class="pre">'X',</span> <span class="pre">6:</span> <span class="pre">'H',</span> <span class="pre">7:</span> <span class="pre">'v'}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pigeon_feather.plot.UptakePlot.__init__" title="Link to this definition"></a></dt>
+<dd><p>hdxms_datas: list of class HDXMSData objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hdxms_datas</strong> – list of HDXMSData objects</p></li>
+<li><p><strong>identifier</strong> – peptide identifier</p></li>
+<li><p><strong>states_subset</strong> – list of states to plot</p></li>
+<li><p><strong>color_dict</strong> – dictionary of colors for each state</p></li>
+<li><p><strong>if_plot_fit</strong> – if True, plot the fit line</p></li>
+<li><p><strong>figure</strong> – figure object</p></li>
+<li><p><strong>ax</strong> – axis object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>hdxms_datas_df</strong> – pandas DataFrame of the HDX-MS data of the peptide</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_uptakeplot</span></code>()</p></td>
+<td><p>make a uptakeplot for a peptide</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_average_peptide</span></code>(state_name)</p></td>
+<td><p>return an averaged peptide for a state</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_title</span></code>()</p></td>
+<td><p>make a title for the plot</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_color_dict</span></code>([color_dict])</p></td>
+<td><p>make a color dictionary for the states in the plot</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="feather.html" class="btn btn-neutral float-left" title="FEATHER" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, glasgowlab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
