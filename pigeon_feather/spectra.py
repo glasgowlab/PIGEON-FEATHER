@@ -252,6 +252,7 @@ def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False, save_match=False):
 
     # round m/z to integer
     selected_df['m/z_raw'] = selected_df['m/z'].values
+    selected_df['Intensity_raw'] = selected_df['Intensity'].values
     selected_df['m/z'] = selected_df['m/z'].apply(round)
 
     # if bad drop replicate
@@ -276,16 +277,17 @@ def get_isotope_envelope(timepoint, add_sn_ratio_to_tp=False, save_match=False):
     
     #    mz_values = timepoint.raw_ms['m/z'].values*timepoint.charge_state - (mfull + 1.007276466812 * timepoint.charge_state)
     if save_match:
-        timepoint.match = (selected_df['m/z_raw'].values + (mfull + 1.007276466812 * timepoint.charge_state)) / timepoint.charge_state
         timepoint.mono_mz = mfull
+        match_mz = (selected_df['m/z_raw'].values + (mfull + 1.007276466812 * timepoint.charge_state)) / timepoint.charge_state
+        timepoint.match = list(zip(match_mz, selected_df['Intensity_raw'].values))
         
         # extract fine structure (uncentroided)
         timepoint.raw_ms_fine_structure = []
         raw_mz_all = timepoint.raw_ms['m/z'].values
         raw_int_all = timepoint.raw_ms['Intensity'].values
 
-        for match_i in timepoint.match:
-            mask = (raw_mz_all >= match_i - 0.1) & (raw_mz_all <= match_i + 0.1)
+        for match_mz_i, _ in timepoint.match:
+            mask = (raw_mz_all >= match_mz_i - 0.1) & (raw_mz_all <= match_mz_i + 0.1)
             indices = np.where(mask)[0]
             if len(indices) == 0:
                 timepoint.raw_ms_fine_structure.append((np.array([np.nan]), np.array([np.nan])))
