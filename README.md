@@ -58,8 +58,8 @@ pip install .
 
 ## Docker
 ```
-docker build -f docker/Dockerfile -t pigeon_feather:0.9 .
-docker run -it -v $(pwd):/work -p 8889:8889 --rm pigeon_feather:0.9 jupyter-lab --port 8889
+docker build -f docker/Dockerfile -t pigeon_feather:1.0 .
+docker run -it -v $(pwd):/work -p 8889:8889 --rm pigeon_feather:1.0 jupyter-lab --port 8889
 ```
 
 click the link in the terminal to open the jupyter notebook
