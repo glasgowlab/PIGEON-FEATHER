@@ -138,6 +138,7 @@ class Pool:
         da_err = [match.peak.mz * match.z - match.pep.mz[match.z] for match in matches]
 
         rt = [match.peak.rt for match in matches]
+        mobility = [match.peak.mobility for match in matches]
         n_hits = [match.fragmatch.size for match in matches]
         n_tries = [np.prod(match.fragmatch.shape) for match in matches]
         score = [match.score for match in matches]
@@ -147,7 +148,8 @@ class Pool:
                                 'z': z, 'mass (calc)': m_calc, 'm/z (calc)': mz_calc,
                                 'mass (meas)': m_meas, 'm/z (meas)': mz_meas,
                                 'error (ppm)': ppm_err, 'error (Da/e)': da_err,
-                                'RT (min)': rt, '# fragment matches': n_hits,
+                                'RT (min)': rt, 'mobility (1/K0)': mobility,
+                                '# fragment matches': n_hits,
                                 '# peaks * fragments': n_tries, 'score': score
                                 })
         df.sort_values(by=['Start', 'End', 'z', 'score'], inplace=True)
@@ -164,6 +166,117 @@ class Pool:
         if path:
             df.to_csv(path, index=False)
         return df
+
+    # PEPTIDE COVERAGE MAP (multi-sequence, single PDF, wrapped rows)
+    def coverage_map(self, seqs_matches, path=None, residues_per_row=100):
+        rcParams['font.sans-serif'][0] = 'Arial'
+        rcParams['font.sans-serif'][7] = 'DejaVu Sans'
+
+        panels = []
+        for seq, matches in seqs_matches:
+            peps = sorted(set((m.pep.start + 1, m.pep.end) for m in matches))
+            lane_ends = []
+            lane_idx = []
+            for start, end in peps:
+                placed = False
+                for j, le in enumerate(lane_ends):
+                    if start > le:
+                        lane_ends[j] = end
+                        lane_idx.append(j)
+                        placed = True
+                        break
+                if not placed:
+                    lane_ends.append(end)
+                    lane_idx.append(len(lane_ends) - 1)
+            n_lanes = max(lane_idx) + 1 if lane_idx else 0
+            n_rows = max(1, int(np.ceil(len(seq) / residues_per_row)))
+            panels.append({
+                'seq': seq, 'peps': peps, 'lane_idx': lane_idx,
+                'n_lanes': n_lanes, 'n_rows': n_rows,
+            })
+
+        char_w = 0.10
+        seq_h = 0.22
+        lane_h = 0.045
+        row_gap = 0.12
+        panel_gap = 0.35
+        margin_l = 0.6
+        margin_r = 0.3
+        margin_t = 0.25
+        margin_b = 0.3
+
+        fig_w = margin_l + margin_r + residues_per_row * char_w
+
+        rows = []
+        for pi, p in enumerate(panels):
+            for r in range(p['n_rows']):
+                rows.append({'panel_idx': pi, 'row_idx': r})
+
+        row_heights = [seq_h + panels[r['panel_idx']]['n_lanes'] * lane_h for r in rows]
+
+        inter_row_total = 0.0
+        for i in range(len(rows) - 1):
+            same_panel = rows[i]['panel_idx'] == rows[i + 1]['panel_idx']
+            inter_row_total += row_gap if same_panel else panel_gap
+
+        fig_h = margin_t + margin_b + sum(row_heights) + inter_row_total
+        figure = plt.figure(figsize=(fig_w, fig_h))
+
+        cur_y_top = fig_h - margin_t
+        for i, row in enumerate(rows):
+            p = panels[row['panel_idx']]
+            seq = p['seq']
+            n_lanes = p['n_lanes']
+            row_h = row_heights[i]
+            ax_y = cur_y_top - row_h
+            ax = figure.add_axes([
+                margin_l / fig_w,
+                ax_y / fig_h,
+                (residues_per_row * char_w) / fig_w,
+                row_h / fig_h,
+            ])
+
+            row_start = row['row_idx'] * residues_per_row + 1
+            row_end = min((row['row_idx'] + 1) * residues_per_row, len(seq))
+
+            ax.set_xlim(row_start - 0.5, row_start + residues_per_row - 0.5)
+            ax.set_ylim(-(n_lanes + 0.5) if n_lanes else -0.5, 1.0)
+
+            for pos in range(row_start, row_end + 1):
+                ax.text(pos, 0.5, seq[pos - 1],
+                        ha='center', va='center',
+                        fontsize=9, family='monospace')
+            ax.text(row_start - 1.0, 0.5, f'{row_start}',
+                    ha='right', va='center', fontsize=6, color='gray')
+            ax.text(row_end + 1.0, 0.5, f'{row_end}',
+                    ha='left', va='center', fontsize=6, color='gray')
+
+            for (start, end), lane in zip(p['peps'], p['lane_idx']):
+                if end < row_start or start > row_start + residues_per_row - 1:
+                    continue
+                clipped_start = max(start, row_start)
+                clipped_end = min(end, row_start + residues_per_row - 1)
+                ax.barh(
+                    -(lane + 1),
+                    clipped_end - clipped_start + 0.8,
+                    left=clipped_start - 0.4,
+                    height=0.5,
+                    color='steelblue',
+                    linewidth=0,
+                )
+
+            ax.set_xticks([])
+            ax.set_yticks([])
+            for sp in ax.spines.values():
+                sp.set_visible(False)
+
+            if i + 1 < len(rows):
+                gap = row_gap if rows[i]['panel_idx'] == rows[i + 1]['panel_idx'] else panel_gap
+                cur_y_top = ax_y - gap
+
+        if path:
+            plt.savefig(path)
+            plt.close(figure)
 
     # LOG STATS ABOUT EACH STEP IN ANALYSIS
     def nums_out(self, match_dict, popt, path=None):
@@ -254,6 +367,7 @@ class Pool:
             degen = [match2 for match2 in allmatches
                      if (np.abs(match1.pep.mz[match1.z] - match2.pep.mz[match2.z]) < mzc
                          and np.abs(match1.peak.rt - match2.peak.rt) < rtc
+                         and match1.z == match2.z
                          and (match1.pep.sequence != match2.pep.sequence
                               or match1.pep.start != match2.pep.start
                               or match1.pep.end != match2.pep.end))]
@@ -268,6 +382,7 @@ class Pool:
                 same_pep = [match2 for match2 in allmatches
                             if (np.abs(match1.pep.mz[match1.z] - match2.pep.mz[match2.z]) < mzc
                                 and np.abs(match1.peak.rt - match2.peak.rt) < rtc
+                                and match1.z == match2.z
                                 and match1.pep.sequence == match2.pep.sequence)]
                 flag = False
 
@@ -437,6 +552,7 @@ class MSMS:
         cmpdnum = np.nan
         rt = np.nan
         ms1int = np.nan
+        mobility = np.nan
 
         ms2s = []
         for line in block:
@@ -453,11 +569,13 @@ class MSMS:
                 if len(line.split()) > 1:
                     ms1int = np.float64(line.split()[1])
                 mz = np.float64(line.split()[0].split('=')[1])
+            if 'ION_MOBILITY=' in line:
+                mobility = np.float64(line.split()[2])
             if line[0].isdigit():
                 ms2s.append(line)
         ms2ints = np.asarray([np.float64(line.split()[1]) for line in ms2s])
         ms2mzs = np.asarray([np.float64(line.split()[0]) for line in ms2s])
-        return Peak(runid, z, mz, cmpdnum, rt, ms1int, ms2ints, ms2mzs)
+        return Peak(runid, z, mz, cmpdnum, rt, ms1int, ms2ints, ms2mzs, mobility)
 
     def read_mgf(self, paths):
         for path in paths:
@@ -476,7 +594,7 @@ class MSMS:
 
 
 class Peak:
-    def __init__(self, runid, z, mz, cmpdnum, rt, ms1int, ms2ints, ms2mzs):
+    def __init__(self, runid, z, mz, cmpdnum, rt, ms1int, ms2ints, ms2mzs, mobility=np.nan):
         self.runid = runid
         self.z = z
         self.mz = mz
@@ -485,6 +603,7 @@ class Peak:
         self.intensity = ms1int
         self.ms2ints = ms2ints
         self.ms2s = ms2mzs
+        self.mobility = mobility
         self.matches = []
 
 
@@ -494,7 +613,7 @@ def analyze(seqs, files, maxz=default_maxz, minl=default_minl, maxl=default_maxl
             ppmc_narrow=default_ppmc_narrow, scorec=default_scorec, fit=default_fit, maxfev=default_maxfev,
             ions=default_ions, threshold=default_threshold, mzc=default_mzc, rtc=default_rtc, pvc=default_pvc,
             cut_method=default_cut_method, sf=default_sf,
-            path='./', plots_dir=None, pool_out=None, rangeslist=None, nums_out=None):
+            path='./', plots_dir=None, pool_out=None, rangeslist=None, nums_out=None, covmap=None):
 
     t0 = time.time()
     pool = Pool([Protein(seq, minl=minl, maxl=maxl, maxz=maxz, ions=ions) for seq in seqs], MSMS())
@@ -555,6 +674,11 @@ def analyze(seqs, files, maxz=default_maxz, minl=default_minl, maxl=default_maxl
             pool.pool_output(ml, path=f'{path}{ol}')
     if nums_out:
         nums = pool.nums_out(match_dict, popt, path=f'{path}{nums_out}')
+    covmap_default_base = f'{plots_dir}/' if plots_dir else ''
+    covmap_path = covmap if covmap else f'{covmap_default_base}coverage.pdf'
+    target_seq = seqs[0]
+    target_matches = [m for m in disambig if target_seq[m.pep.start:m.pep.end] == m.pep.sequence]
+    pool.coverage_map([(target_seq, target_matches)], path=f'{path}{covmap_path}')
 
     print(f'plots + output: {time.time() - t0}')
     if nums_out:
@@ -592,6 +716,7 @@ def parse_args():
     parser.add_argument('--pvc', dest='pvc', type=float, help='p value cutoff for duplicates')
     parser.add_argument('--c', '--method', '--cm', dest='cut_method', help="how to treat coeluting peptides: keep or drop?")
     parser.add_argument('--scorefloor', '--sf', dest='scorefloor', type=float, help='minimum score for score cut')
+    parser.add_argument('--covmap', dest='covmap', help='coverage map PDF output path; auto-named if omitted')
 
     args = parser.parse_args()
 
@@ -629,13 +754,14 @@ def main():
     pool_out = args.output if args.output else None
     rangeslist = args.rangeslist if args.rangeslist else None
     nums_out = args.nums if args.nums else None
+    covmap = args.covmap if args.covmap else None
 
     analyze(seqs, files, maxz=maxz, minl=minl, maxl=maxl, ppmc_wide=ppmc_wide,
             ppmc_narrow=ppmc_narrow, scorec=scorec, fit=fit, maxfev=maxfev,
             ions=ions, threshold=threshold, mzc=mzc, rtc=rtc, pvc=pvc,
             cut_method=cut_method, sf=sf,
             path=path, plots_dir=plots_dir, pool_out=pool_out,
-            rangeslist=rangeslist, nums_out=nums_out)
+            rangeslist=rangeslist, nums_out=nums_out, covmap=covmap)
     return
 
 
