@@ -846,7 +846,6 @@ def backexchange_correction(hdxms_data_list):
         all_inf_tps, ["peptide.identifier"]
     )
 
-
     pep_with_exp_max_d = [
         pep for pep in all_peps if pep.get_timepoint(np.inf) is not None
     ]
@@ -898,6 +897,10 @@ def backexchange_correction(hdxms_data_list):
         max_d_ratios = [
             i.num_d/i.peptide.theo_max_d for i in all_inf_tps_grouped[target_key]
         ]
+        
+        if len(max_d_ratios) == 0:
+            # no valid values found
+            continue
         
         max_d_ratios = list(set(max_d_ratios))
         avg_max_d_ratios = np.mean(max_d_ratios)        

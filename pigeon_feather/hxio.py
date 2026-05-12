@@ -562,10 +562,10 @@ def load_HXMS_files(hxms_files, n_fastamides=2):
     
     datasets_list = []
     for hxms_file in hxms_files:
-        datasets_list.append(load_HXMS_file(hxms_file, n_fastamides))
+        datasets_list.append(load_HXMS_file(hxms_file, n_fastamides, flatten_replicates=True)[0])
     return tools.merge_hdxms_datasets(datasets_list)
 
-def load_HXMS_file(hxms_file, n_fastamides=2):
+def load_HXMS_file(hxms_file, n_fastamides=2, flatten_replicates=True):
     'load a HXMS file and return a HDXMSData object'
     
     with open(hxms_file, "r") as f:
@@ -591,15 +591,19 @@ def load_HXMS_file(hxms_file, n_fastamides=2):
     temperature = float(METADATA["TEMPERATURE(K)"])
     ph = float(METADATA["pH(READ)"])
     saturation = float(METADATA["D2O_SATURATION"])
+    
+    rep_list = [0] if flatten_replicates else list({int(row[5]) for row in TP_LINES})   
 
-    hdxms_data = data.HDXMSData(
-        protein_name,
-        n_fastamides,
-        protein_sequence=protein_sequence,
-        saturation=saturation,
-        temperature=temperature,
-        pH=ph,
-    )
+    hdxms_data_dict = {
+        rep: data.HDXMSData(
+            protein_name,
+            n_fastamides,
+            protein_sequence=protein_sequence,
+            saturation=saturation,
+            temperature=temperature,
+            pH=ph,
+        ) for rep in rep_list
+    }
 
     # Iterate over rows in the dataframe
     for row in TP_LINES:
@@ -617,6 +621,8 @@ def load_HXMS_file(hxms_file, n_fastamides=2):
         else:
             ENVELOPE = np.array([float(val) for val in row[-1].split(",")])
         
+        hdxms_data = hdxms_data_dict[0 if flatten_replicates else REP]
+       
         # Check if protein state exists
         protein_state = None
         for state in hdxms_data.states:
@@ -667,8 +673,8 @@ def load_HXMS_file(hxms_file, n_fastamides=2):
         timepoint.isotope_envelope = ENVELOPE
 
         peptide.add_timepoint(timepoint, allow_duplicate=True)
-
-    return hdxms_data
+        
+    return [hdxms_data_dict[rep] for rep in rep_list]
 
 
 def write_HXMS_files(hdxms_data_list, protein_name, output_dir="."):
