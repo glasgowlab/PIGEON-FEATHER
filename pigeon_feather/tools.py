@@ -913,21 +913,15 @@ def _add_max_d_to_pep(pep, max_d_theo_max_ratio=None, max_d=None, force=False):
     if max_d_theo_max_ratio is None and max_d is None:
         raise ValueError("Either max_d_theo_max_ratio or max_d must be provided")
     
+    if max_d is None:
+        max_d = max_d_theo_max_ratio * pep.theo_max_d
+    inf_tp = Timepoint(pep, np.inf, max_d, np.nan)
+    
     if not force:
-
-        if pep.get_timepoint(np.inf) is None:
-            if max_d is None:
-                max_d = max_d_theo_max_ratio * pep.theo_max_d
-            inf_tp = Timepoint(pep, np.inf, max_d, np.nan)
-            pep.add_timepoint(inf_tp)
-        else:
-            print("np.inf tp already exists")
+        pep.add_timepoint(inf_tp, allow_duplicate=True)
 
     else:
         pep.timepoints = [tp for tp in pep.timepoints if tp.deut_time != np.inf]
-        if max_d is None:
-            max_d = max_d_theo_max_ratio * pep.theo_max_d
-        inf_tp = Timepoint(pep, np.inf, max_d, np.nan)
         pep.add_timepoint(inf_tp)
     return pep
 
