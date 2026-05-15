@@ -367,7 +367,6 @@ class Pool:
             degen = [match2 for match2 in allmatches
                      if (np.abs(match1.pep.mz[match1.z] - match2.pep.mz[match2.z]) < mzc
                          and np.abs(match1.peak.rt - match2.peak.rt) < rtc
-                         and match1.z == match2.z
                          and (match1.pep.sequence != match2.pep.sequence
                               or match1.pep.start != match2.pep.start
                               or match1.pep.end != match2.pep.end))]
@@ -382,7 +381,6 @@ class Pool:
                 same_pep = [match2 for match2 in allmatches
                             if (np.abs(match1.pep.mz[match1.z] - match2.pep.mz[match2.z]) < mzc
                                 and np.abs(match1.peak.rt - match2.peak.rt) < rtc
-                                and match1.z == match2.z
                                 and match1.pep.sequence == match2.pep.sequence)]
                 flag = False
 
