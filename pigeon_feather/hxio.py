@@ -132,12 +132,13 @@ def clean_data_df(df):
     # add 0 timepoint if not present
     if 0 not in df["Deut Time (sec)"].unique():
         tp0s = df.groupby(
-            ["Sequence", "Protein State", "Start", "End", "Charge", "replicate_index"]
+            ["Sequence", "Protein State", "Start", "End", "Charge"]
         ).mean(numeric_only=True)
 
         tp0s[["Deut Time (sec)", "#D", "Stddev"]] = 0
         tp0s["Score"] = 1
         tp0s["#Rep"] = 1
+        tp0s["replicate_index"] = 0
 
         df = pd.concat([df, tp0s.reset_index()]).sort_values(
             by=["Start", "End", "Deut Time (sec)", "Protein State"]
