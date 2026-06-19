@@ -86,7 +86,18 @@ def process_tp_frame(header, bigdf, tp_chunk, new_df):
     if tp_time.startswith("Full-D"):
         tp_df["Deut Time (sec)"] = np.inf
     else:
-        tp_df["Deut Time (sec)"] = float(tp_time.split("s")[0])
+        tp_float = float(tp_time.split("s")[0])
+        tp_df["Deut Time (sec)"] = tp_float
+
+    deut_time = tp_df["Deut Time (sec)"].iloc[0]
+
+    if new_df.empty or deut_time not in new_df["Deut Time (sec)"].values:
+        replicate_index = 0
+    else:
+        prev_reps = new_df.loc[new_df["Deut Time (sec)"] == deut_time, "replicate_index"]
+        replicate_index = int(prev_reps.max()) + 1
+
+    tp_df["replicate_index"] = replicate_index
 
     new_df = pd.concat([new_df, tp_df])
 
@@ -96,7 +107,7 @@ def process_tp_frame(header, bigdf, tp_chunk, new_df):
 def clean_data_df(df):
     # Group by the specified columns and aggregate the specified columns with mean, std, and count
     df = df.groupby(
-        ["Sequence", "Deut Time (sec)", "State", "Start", "End", "Charge"]
+        ["Sequence", "Deut Time (sec)", "State", "Start", "End", "Charge","replicate_index"]
     )[["#D", "Search RT", "Score"]].agg(["mean", "std", "count"])
     
     # Flatten the MultiIndex columns created by agg
@@ -120,20 +131,19 @@ def clean_data_df(df):
     
     # add 0 timepoint if not present
     if 0 not in df["Deut Time (sec)"].unique():
-        # Group by the specified columns and sum the groups
-        tp0s = df.groupby(["Sequence", "Protein State", "Start", "End", "Charge"]).mean()
-        
-        # Set the specified columns to 0
+        tp0s = df.groupby(
+            ["Sequence", "Protein State", "Start", "End", "Charge", "replicate_index"]
+        ).mean(numeric_only=True)
+
         tp0s[["Deut Time (sec)", "#D", "Stddev"]] = 0
         tp0s["Score"] = 1
-        
-        # Set "#Rep" to 1
         tp0s["#Rep"] = 1
-        
-        # Concatenate the dataframes and sort the values
+
         df = pd.concat([df, tp0s.reset_index()]).sort_values(
             by=["Start", "End", "Deut Time (sec)", "Protein State"]
         )
+
+    df["replicate_index"] = df["replicate_index"].astype(int)
 
     return df
 
@@ -171,7 +181,6 @@ def load_dataframe_to_hdxmsdata(
     protein_name="Test",
     n_fastamides=2,
     protein_sequence=None,
-    fulld_approx=False,
     saturation=1.0,
     pH=None,
     temperature=None,
@@ -243,24 +252,16 @@ def load_dataframe_to_hdxmsdata(
             row["Stddev"],
             int(row["Charge"]),
             score=row["Score"],
+            replicate_index=row["replicate_index"],
         )
 
         # if timepoint has no data, skip
         if np.isnan(timepoint.num_d):
             continue
         else:
-            if timepoint.deut_time == np.inf and fulld_approx:
-                # add inf timepoint as a real timepoint, 1e8s
-                real_inf_timepoint = Timepoint(
-                    peptide, 100000000, row["#D"], row["Stddev"], int(row["Charge"])
-                )
-                peptide.add_timepoint(real_inf_timepoint)
-            peptide.add_timepoint(timepoint)
+            peptide.add_timepoint(timepoint, allow_duplicate=True)
 
     return hdxms_data
-
-
-import pandas as pd
 
 
 def revert_hdxmsdata_to_dataframe(hdxms_data, if_percent=False):
@@ -392,20 +393,13 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, 
                         )[0]
                     except:
                         raise ValueError(f"Error loading raw MS data for {peptide.identifier} at {tp.deut_time}s, charge {tp.charge_state} at: {pep_sub_folder}")
-
-                # elif tp.deut_time == 100000000:
-                #     csv_file_path = glob(
-                #         f"{pep_sub_folder}/Full-D-*-z{tp.charge_state}.csv"
-                #     )[0]
-
+                    
                 else:
-                    csv_name = f"{int(tp.deut_time)}s-1-z{tp.charge_state}.csv"
+                    csv_name = f"{int(tp.deut_time)}s-{int(tp.replicate_index+1)}-z{tp.charge_state}.csv"
                     csv_file_path = os.path.join(pep_sub_folder, csv_name)
                 try:
                     df = tp.load_raw_ms_csv(csv_file_path, save_match=save_match)
                 except:
-                    # print(peptide.identifier, tp.deut_time, tp.charge_state)
-                    # print(csv_file_path)
                     raise Warning(f"Error loading raw MS data for {peptide.identifier} at {tp.deut_time}s, charge {tp.charge_state}: {csv_file_path}")
 
         bad_timepoints = [

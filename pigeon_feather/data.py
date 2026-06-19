@@ -645,7 +645,7 @@ class Peptide:
 
 
 class Timepoint:
-    def __init__(self, peptide, deut_time, num_d, stddev, charge_state=None, score=None):
+    def __init__(self, peptide, deut_time, num_d, stddev, charge_state=None, score=None, replicate_index=0):
         '''
         A class to store one timepoint of a peptide.
 
@@ -666,6 +666,7 @@ class Timepoint:
         self.note = None
         self.isotope_envelope = None
         self.score = score
+        self.replicate_index = replicate_index
 
     def load_raw_ms_csv(self, csv_file, save_match=False):
         'load raw mass spec data from a HDExaminer csv file'
