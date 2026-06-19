@@ -232,8 +232,8 @@ def load_dataframe_to_hdxmsdata(
         # If peptide does not exist, create and add to ProteinState
         if not peptide:
             # skip if peptide is less than 4 residues
-            if len(row["Sequence"]) < 4:
-                continue
+            # if len(row["Sequence"]) < 4:
+            #     continue
             peptide = Peptide(
                 row["Sequence"],
                 row["Start"],
