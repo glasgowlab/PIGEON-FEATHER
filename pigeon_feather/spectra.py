@@ -401,7 +401,6 @@ from scipy.signal import find_peaks
 
 def filter_peak_pickings(data):
 
-    data_x = np.arange(len(data))
     data_y = deepcopy(data)
     
     # def centroid_of_peak(peak_i, data_x, data_y):
@@ -413,7 +412,8 @@ def filter_peak_pickings(data):
     # Find peaks
     peaks, _ = find_peaks(data_y, height=0, prominence=0.01, distance=3)
     if peaks.size == 0:
-        return peak_df
+        total = np.sum(data_y)
+        return data_y / total if total > 0 else data_y
     
     # Get peak data
     peak_data = find_peak_data(data_y, peaks)

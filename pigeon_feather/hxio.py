@@ -354,7 +354,8 @@ def convert_dataframe_to_bayesianhdx_format(
     print(f"Data saved to {OUTPATH}")
 
 
-def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, back_exchange_threshold=0.4, save_match=False):
+def load_raw_ms_to_hdxms_data(
+    hdxms_data, raw_spectra_path, print_details=True, back_exchange_threshold=0.4, save_match=False, refine_peptides=True):
     """
     Load raw MS data from csv files to hdxms_data object.
     !!! use it before reindex_peptide_from_pdb
@@ -427,9 +428,10 @@ def load_raw_ms_to_hdxms_data(hdxms_data, raw_spectra_path, print_details=True, 
             print(','.join(removed_idfs))
 
     print("Done loading raw MS data.")
-
-    for state in hdxms_data.states:
-        refine_large_error_reps(state)
+    
+    if refine_peptides:
+        for state in hdxms_data.states:
+            refine_large_error_reps(state)
 
 
 def export_iso_files(hdxms_data, outdir, overwrite=True):
@@ -709,8 +711,6 @@ def write_HXMS_files(hdxms_data_list, protein_name, output_dir="."):
         hdxms_data_obj = protein_states[0].hdxms_data
 
         HEADER = (
-            f"HEADER      HX/MS DATA FORMAT v1.0 {datetime.now().strftime('%Y-%m-%d')}\n"
-            f"HEADER      Hydrogen Exchange Mass Spectrometry Data\n"
             # f"REMARK100\n"
             # f"REMARK100 DOI:\n"
             f"METADATA    PROTEIN_SEQUENCE    {hdxms_data_obj.protein_sequence}\n"
@@ -719,7 +719,8 @@ def write_HXMS_files(hdxms_data_list, protein_name, output_dir="."):
             f"METADATA    TEMPERATURE(K)      {hdxms_data_obj.temperature}\n"
             f"METADATA    pH(READ)            {hdxms_data_obj.pH}\n"
             f"METADATA    D2O_SATURATION      {hdxms_data_obj.saturation}\n"
-            f"METADATA    DATATYPE            ENVELOPE\n"
+            f"REMARK      DATATYPE            ENVELOPE\n"
+            f"REMARK      HXMS_DATA_FORMAT    v1.0_{datetime.now().strftime('%Y-%m-%d')}\n"
         )
 
         TP_COLTITLE = (

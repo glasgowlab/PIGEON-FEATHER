@@ -857,7 +857,6 @@ def backexchange_correction(hdxms_data_list):
     print(f"Number of peptides with experimental max_d: {len(pep_with_exp_max_d)}")
     print(f"Number of peptides with no experimental max_d: {len(pep_with_no_exp_mad_d)}")
 
-    import re
 
     # Function to extract the numbers from the key
     def _extract_numbers(key):
