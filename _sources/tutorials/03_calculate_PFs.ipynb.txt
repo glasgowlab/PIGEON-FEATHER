@@ -1,0 +1,326 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 03_calculate_PFs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Determination of memory status is not supported on this \n",
+      " platform, measuring for memoryleaks will never fail\n"
+     ]
+    }
+   ],
+   "source": [
+    "from pigeon_feather.data import *\n",
+    "from pigeon_feather.plot import *\n",
+    "from pigeon_feather.hxio import *\n",
+    "from pigeon_feather.spectra import *\n",
+    "\n",
+    "\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "import datetime\n",
+    "import os\n",
+    "import pickle\n",
+    "import datetime"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Number of peptides with experimental max_d: 358\n",
+      "Number of peptides with no experimental max_d: 12\n"
+     ]
+    }
+   ],
+   "source": [
+    "# load the pickle file we saved in the previous notebook\n",
+    "\n",
+    "\n",
+    "today = datetime.date.today().strftime(\"%Y%m%d\")\n",
+    "today = \"20240722\"\n",
+    "\n",
+    "with open(f\"./data/hdxms_data_raw_{today}.pkl\", \"rb\") as f:\n",
+    "    hdxms_data_list = pickle.load(f)\n",
+    "\n",
+    "\n",
+    "# back exchange correction for peptides with experimental full deuteration data based its closest match in the database\n",
+    "tools.backexchange_correction(hdxms_data_list)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# make folders for results\n",
+    "\n",
+    "today_date = datetime.date.today().strftime(\"%Y%m%d\")\n",
+    "# today_date = '20240722'\n",
+    "results_path = f\"ecDHFR_results_{today_date}\"\n",
+    "\n",
+    "if not os.path.exists(results_path):\n",
+    "    os.makedirs(results_path)\n",
+    "\n",
+    "\n",
+    "out_path = \"./data/PF_input_20240722\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## peptide subtraction"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "117 new peptides added to the APO state.\n",
+      "127 new peptides added to the TRI state.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# [state.add_all_subtract() for data in hdxms_data_list for state in data.states]\n",
+    "# add_new_peptides_by_subtract()\n",
+    "for i in range(1):\n",
+    "    [\n",
+    "        state.add_new_peptides_by_subtract()\n",
+    "        for data in hdxms_data_list[:]\n",
+    "        for state in data.states\n",
+    "    ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[117, 127]"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "[state.num_subtracted_added for data in hdxms_data_list for state in data.states]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "save the data as a pickle file for later use,  and write to files used for bayesian sampling"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "with open(f\"{out_path}/hdxms_data_list.pkl\", \"wb\") as f:\n",
+    "    pickle.dump(hdxms_data_list, f)\n",
+    "\n",
+    "# with open(f\"{out_path}/hdxms_data_list.pkl\", \"rb\") as f:\n",
+    "#     hdxms_data_list = pickle.load(f)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## inputs for MCMC sampling"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Isotope files saved to ./data/PF_input_20240722/spectra_dhfr_tutorial_dataset\n",
+      "Reminder: sequence contains fastamides !!!\n",
+      "Reminder: sequence contains fastamides !!!\n",
+      "Data saved to ./data/PF_input_20240722\n",
+      "dhfr_tutorial_dataset\n"
+     ]
+    }
+   ],
+   "source": [
+    "exp_names = [\n",
+    "    \"dhfr_tutorial_dataset\",\n",
+    "]\n",
+    "\n",
+    "for i in range(len(hdxms_data_list)):\n",
+    "    # exp_name = raw_spectra_paths[i].split('/')[-2].split('SpecExport_')[-1]\n",
+    "    exp_name = exp_names[i]\n",
+    "    export_iso_files(\n",
+    "        hdxms_data_list[i], outdir=f\"{out_path}/spectra_{exp_name}\", overwrite=True\n",
+    "    )\n",
+    "    df = revert_hdxmsdata_to_dataframe(hdxms_data_list[i])\n",
+    "    convert_dataframe_to_bayesianhdx_format(\n",
+    "        df, protein_name=exp_name, OUTPATH=f\"{out_path}\"\n",
+    "    )\n",
+    "\n",
+    "    print(exp_name)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "write ready to run script for each state"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "\n",
+    "protein_sequence = \"MTGHHHHHHENLYFQSISLIAALAVDRVIGMENAMPWNLPADLAWFKRNTLDKPVIMGRHTWESIGRPLPGRKNIILSSQPGTDDRVTWVKSVDEAIAACGDVPEIMVIGGGRVYEQFLPKAQKLYLTHIDAEVEGDTHFPDYEPDDWESVFSEFHDADAQNSHSYCFEILERR\"\n",
+    "\n",
+    "state_names = list(\n",
+    "    set([state.state_name for data in hdxms_data_list for state in data.states])\n",
+    ")\n",
+    "for protein_state in state_names:\n",
+    "    script = tools.generate_bayesian_hdx_script(\n",
+    "        exp_names,\n",
+    "        protein_sequence,\n",
+    "        protein_state,\n",
+    "        base_directory=\".\",\n",
+    "        making_chunks=True,\n",
+    "        pH=7.0,\n",
+    "        temperature=293.0,\n",
+    "        saturation=0.9,\n",
+    "        rerun_num=3,\n",
+    "        extreme_value_prior=False,\n",
+    "        structural_prior=False,\n",
+    "    )\n",
+    "\n",
+    "    with open(f\"{out_path}/run_bayesian_hdx_{protein_state}_chunks.py\", \"w\") as f:\n",
+    "        f.write(script)\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## two priors"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Make sure you generate the priors if you enable twp priors in `tools.generate_bayesian_hdx_script`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# uptake prior\n",
+    "#tools.generate_extreme_value_prior(hdxms_data_list, out_path)\n",
+    "\n",
+    "\n",
+    "# structural prior\n",
+    "\n",
+    "# solvated_pdbs = [\n",
+    "#     \"./data/5DFR_APO_relaxed_best_solvated.pdb\",\n",
+    "#     \"./data/6XG5_TRI_relaxed_best_solvated.pdb\",\n",
+    "#     \"./data/1RG7_MTX_relaxed_best_solvated.pdb\",\n",
+    "# ]\n",
+    "\n",
+    "# for i, state_name in enumerate([\"APO\", \"TRI\", \"MTX\"]):\n",
+    "\n",
+    "\n",
+    "#     tools.generate_structural_prior(\n",
+    "#         protein_sequence, solvated_pdbs[i], out_path, state_name\n",
+    "#     )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can run the script in the terminal with the following command:\n",
+    "\n",
+    "```sh\n",
+    "cd ./data/bayesian_hdx_input_20240722\n",
+    "python run_bayesian_hdx_APO_chunks.py\n",
+    "```\n",
+    "\n",
+    "The simulations usually take several hours, but the duration varies based on the size of the dataset (number of peptides, time points, and replicates).\n",
+    "\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "pigeon_feather",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
